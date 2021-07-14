@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="25dp"
+    tools:context=".RegistrationActivity">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="750dp"
+    tools:context=".RegistrationActivity">
+
+    <TextView
+        android:id="@+id/conquer_txtview_reg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="casual"
+        android:text="Conquer"
+        android:textSize="50sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:fontFamily="casual"
+        tools:ignore="HardcodedText" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nick_input_reg"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="Nickname"
+        app:startIconDrawable="@drawable/ic_baseline_account_circle_24"
+        app:boxStrokeColor="@color/black"
+        app:hintTextColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/conquer_txtview_reg"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="50dp"
+        tools:ignore="HardcodedText">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/pswd_input_reg"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        app:startIconDrawable="@drawable/ic_baseline_lock_24"
+        app:boxStrokeColor="@color/black"
+        app:hintTextColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/nick_input_reg"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="35dp"
+        app:endIconMode="password_toggle"
+        tools:ignore="HardcodedText">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/pswd2_input_reg"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="Conferma Password"
+        app:startIconDrawable="@drawable/ic_baseline_lock_24"
+        app:boxStrokeColor="@color/black"
+        app:hintTextColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/pswd_input_reg"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:endIconMode="password_toggle"
+        android:layout_marginTop="35dp"
+        tools:ignore="HardcodedText">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/registrati_btn_reg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:alpha="0.9"
+        android:backgroundTint="@color/black"
+        android:text="Registrati"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/pswd2_input_reg"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/pswd2_input_reg"
+        app:layout_constraintTop_toBottomOf="@+id/pswd2_input_reg"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/torna_al_menu_btn_reg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="72dp"
+        android:alpha="0.9"
+        android:backgroundTint="@color/black"
+        android:text="Torna al menu"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/pswd2_input_reg"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/pswd2_input_reg"
+        app:layout_constraintTop_toBottomOf="@+id/registrati_btn_reg"
+        tools:ignore="HardcodedText" />
+
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="100dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="35dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toStartOf="@+id/registrati_btn_reg"
+        app:layout_constraintTop_toBottomOf="@+id/registrati_btn_reg"/>
+
+
+    <TextView
+        android:id="@+id/oppure_txtview"
+        android:layout_width="wrap_content"
+        android:layout_height="21dp"
+        android:gravity="center"
+        android:text="OPPURE"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/torna_al_menu_btn_reg"
+        app:layout_constraintEnd_toStartOf="@+id/divider2"
+        app:layout_constraintStart_toEndOf="@+id/divider1"
+        app:layout_constraintTop_toBottomOf="@+id/registrati_btn_reg"
+        tools:ignore="HardcodedText" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="100dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="35dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="@+id/registrati_btn_reg"
+        app:layout_constraintTop_toBottomOf="@+id/registrati_btn_reg"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
