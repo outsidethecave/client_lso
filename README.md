@@ -1,0 +1,2 @@
+# lso
+Progetto LSO
