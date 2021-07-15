@@ -34,7 +34,7 @@ public class ConnectionActivity extends AppCompatActivity {
             new Thread(() -> {
                 if (ConnectionHandler.startConnection()) {
                     runOnUiThread(() -> progressDialog.dismiss());
-                    goToMainActivity();
+                    goToAuthActivity();
                 } else {
                     runOnUiThread(() -> {
                         progressDialog.dismiss();
@@ -47,7 +47,7 @@ public class ConnectionActivity extends AppCompatActivity {
 
     }
 
-    private void goToMainActivity() {
+    private void goToAuthActivity() {
         startActivity(new Intent(this, AuthenticationActivity.class));
     }
 
