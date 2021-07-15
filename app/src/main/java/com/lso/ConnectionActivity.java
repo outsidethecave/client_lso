@@ -48,7 +48,7 @@ public class ConnectionActivity extends AppCompatActivity {
     }
 
     private void goToMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, AuthenticationActivity.class));
     }
 
 }
