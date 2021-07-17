@@ -32,7 +32,7 @@ public class LogInActivity extends AppCompatActivity {
 
 
     private void setBackToMenuButton() {
-        Button torna_al_login_btn = findViewById(R.id.torna_al_menu_btn_reg);
+        Button torna_al_login_btn = findViewById(R.id.torna_al_menu_btn_login);
         torna_al_login_btn.setOnClickListener(v -> {
             startActivity(new Intent(LogInActivity.this, ConnectionActivity.class));
             finishAffinity();
@@ -68,7 +68,7 @@ public class LogInActivity extends AppCompatActivity {
                 while (true) {
                     int loginOutcome = UserDataHandler.logIn(nick, pswd);
                     if (loginOutcome == 0) {
-                        // Oltre al toast bisogna passare alla schermata principale
+                        goToMainActivity();
                         // Bisogna creare una variabile currUser in un eventuale Controller
                         runOnUiThread(() -> Toast.makeText(this, nick + " ha effettuato il login", Toast.LENGTH_SHORT).show());
                     }
@@ -95,5 +95,10 @@ public class LogInActivity extends AppCompatActivity {
                 }
             }).start();
         });
+    }
+
+    private void goToMainActivity() {
+        startActivity(new Intent(this, MainActivity.class));
+        finishAffinity();
     }
 }

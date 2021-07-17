@@ -1,35 +1,16 @@
 package com.lso;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.Objects;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 public class ConnectionHandler {
 
     private static final String TAG = ConnectionHandler.class.getSimpleName();
+    //private static final String SERVER_IP = "20.203.137.149";
     private static final String SERVER_IP = "192.168.1.77";
     private static final int SERVER_PORT = 50000;
 

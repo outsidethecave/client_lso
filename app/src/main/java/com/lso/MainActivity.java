@@ -1,34 +1,42 @@
 package com.lso;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
-import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setRegisterBtn();
-        setLoginBtn();
+        setActiveUsersButton();
     }
 
-    private void setRegisterBtn () {
-        Button registrati_btn = findViewById(R.id.registrati_btn_main);
-        registrati_btn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, RegistrationActivity.class)));
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
-    private void setLoginBtn () {
-        Button login_btn = findViewById(R.id.login_btn_main);
-        login_btn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, LogInActivity.class)));
+
+    private void setActiveUsersButton() {
+        Button activeUsersBtn = findViewById(R.id.visualizza_utenti_btn);
+        activeUsersBtn.setOnClickListener(v -> goToActiveUsersActivity());
+    }
+
+    private void goToActiveUsersActivity() {
+        startActivity(new Intent(this, ActiveUsersActivity.class));
     }
 
 }
