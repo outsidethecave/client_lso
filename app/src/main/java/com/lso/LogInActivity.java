@@ -68,7 +68,7 @@ public class LogInActivity extends AppCompatActivity {
                 while (true) {
                     int loginOutcome = UserDataHandler.logIn(nick, pswd);
                     if (loginOutcome == 0) {
-                        // Oltre al toast bisogna passare alla schermata principale
+                        goToMainActivity();
                         // Bisogna creare una variabile currUser in un eventuale Controller
                         runOnUiThread(() -> Toast.makeText(this, nick + " ha effettuato il login", Toast.LENGTH_SHORT).show());
                     }
@@ -95,5 +95,10 @@ public class LogInActivity extends AppCompatActivity {
                 }
             }).start();
         });
+    }
+
+    private void goToMainActivity() {
+        startActivity(new Intent(this, MainActivity.class));
+        finishAffinity();
     }
 }
