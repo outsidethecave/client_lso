@@ -11,7 +11,7 @@ public class ConnectionHandler {
 
     private static final String TAG = ConnectionHandler.class.getSimpleName();
     //private static final String SERVER_IP = "20.203.137.149";
-    private static final String SERVER_IP = "192.168.1.77";
+    private static final String SERVER_IP = "192.168.1.75";
     private static final int SERVER_PORT = 50000;
 
     private static Socket clientSocket;

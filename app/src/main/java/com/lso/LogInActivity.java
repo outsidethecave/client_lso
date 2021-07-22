@@ -66,10 +66,10 @@ public class LogInActivity extends AppCompatActivity {
 
             new Thread(() -> {
                 while (true) {
-                    int loginOutcome = UserDataHandler.logIn(nick, pswd);
+                    int loginOutcome = AuthenticationHandler.logIn(nick, pswd);
                     if (loginOutcome == 0) {
+                        AuthenticationHandler.setCurrUser(nick);
                         goToMainActivity();
-                        // Bisogna creare una variabile currUser in un eventuale Controller
                         runOnUiThread(() -> Toast.makeText(this, nick + " ha effettuato il login", Toast.LENGTH_SHORT).show());
                     }
                     else if (loginOutcome == 1) {

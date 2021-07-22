@@ -80,7 +80,7 @@ public class RegistrationActivity extends AppCompatActivity {
             if (!exit) {
                 new Thread(() -> {
                     while (true) {
-                        int addUserOutcome = UserDataHandler.addUser(nick, pswd1);
+                        int addUserOutcome = AuthenticationHandler.addUser(nick, pswd1);
                         if (addUserOutcome == 0) {
                             runOnUiThread(() -> Toast.makeText(this, "Utente registrato", Toast.LENGTH_SHORT).show());
                         }

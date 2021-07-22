@@ -18,25 +18,35 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         setActiveUsersButton();
+        setFindGameButton();
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed () {
         moveTaskToBack(true);
     }
 
-    private void setActiveUsersButton() {
+    private void setActiveUsersButton () {
         Button activeUsersBtn = findViewById(R.id.visualizza_utenti_btn);
         activeUsersBtn.setOnClickListener(v -> goToActiveUsersActivity());
     }
 
-    private void goToActiveUsersActivity() {
+    private void setFindGameButton () {
+        Button activeUsersBtn = findViewById(R.id.unisciti_btn);
+        activeUsersBtn.setOnClickListener(v -> goToGameActivity());
+    }
+
+    private void goToActiveUsersActivity () {
         startActivity(new Intent(this, ActiveUsersActivity.class));
+    }
+
+    private void goToGameActivity () {
+        startActivity(new Intent(this, GameActivity.class));
     }
 
 }
