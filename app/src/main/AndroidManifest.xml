@@ -12,10 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LSO">
+        <activity android:name=".WinnerActivity"></activity>
         <activity
             android:name=".GameActivity"
-            android:theme="@style/Theme.Design.Light.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.Design.Light.NoActionBar"></activity>
         <activity android:name=".ActiveUsersActivity" />
         <activity android:name=".MainActivity" />
         <activity

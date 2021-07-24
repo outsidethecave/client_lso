@@ -27,6 +27,7 @@
         android:layout_height="50dp"
         android:text="N"
         android:textSize="20sp"
+        android:enabled="false"
         app:layout_constraintBottom_toTopOf="@+id/nswe_holder"
         app:layout_constraintEnd_toEndOf="@+id/east_btn"
         app:layout_constraintStart_toStartOf="@+id/west_btn" />
@@ -37,6 +38,7 @@
         android:layout_height="50dp"
         android:text="S"
         android:textSize="20sp"
+        android:enabled="false"
         app:layout_constraintEnd_toEndOf="@+id/east_btn"
         app:layout_constraintStart_toStartOf="@+id/west_btn"
         app:layout_constraintTop_toBottomOf="@+id/nswe_holder" />
@@ -47,6 +49,7 @@
         android:layout_height="50dp"
         android:text="E"
         android:textSize="20sp"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="@+id/south_btn"
         app:layout_constraintStart_toEndOf="@+id/nswe_holder"
         app:layout_constraintTop_toTopOf="@+id/north_btn" />
@@ -57,6 +60,7 @@
         android:layout_height="50dp"
         android:text="W"
         android:textSize="20sp"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="@+id/south_btn"
         app:layout_constraintEnd_toStartOf="@+id/nswe_holder"
         app:layout_constraintTop_toTopOf="@+id/north_btn" />

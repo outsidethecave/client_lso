@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class AuthenticationHandler {
 
-    private static String currUser;
+    public static String currUser;
 
     public static int addUser (String nick, String pswd) {
         ConnectionHandler.write("1"+ nick + "|" + pswd);
@@ -50,4 +50,7 @@ public class AuthenticationHandler {
         currUser = nick;
     }
 
+    public static String getCurrUser() {
+        return currUser;
+    }
 }
