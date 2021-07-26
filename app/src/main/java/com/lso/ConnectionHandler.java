@@ -10,6 +10,7 @@ import java.net.Socket;
 public class ConnectionHandler {
 
     private static final String TAG = ConnectionHandler.class.getSimpleName();
+
     //private static final String SERVER_IP = "20.203.137.149";
     private static final String SERVER_IP = "192.168.1.75";
     private static final int SERVER_PORT = 50000;
@@ -40,7 +41,8 @@ public class ConnectionHandler {
     }
 
     public static void write (String line) {
-        out.println(line);
+        out.print(line);
+        out.flush();
     }
 
     public static void stopConnection () {

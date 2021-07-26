@@ -1,7 +1,7 @@
 package com.lso;
 
+import android.content.Intent;
 import android.graphics.Color;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -10,50 +10,69 @@ import androidx.gridlayout.widget.GridLayout;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
 
 public class GameController {
 
     private static final String TAG = GameController.class.getSimpleName();
 
     private static final String LOOK_FOR_MATCH = "4";
-    private static final String MATCH_FOUND = "1";
-    private static final String ACK = "5";
+    private static final String STOP_LOOKING_FOR_MATCH = "5";
+    private static final String GAME_ACTION = "6";
 
-    private static final char RECIEVE_ACTIVE_PLAYER = '1';
+    private static final String LEAVE_QUEUE = "1";
+
+    private static final String LEAVE_MATCH = "8";
+
+    private static final char RECEIVE_ACTIVE_PLAYER = '1';
     private static final char SUCCESSFUL_ATTACK = '2';
     private static final char FAILED_ATTACK = '3';
     private static final char MOVE_ON_OWN_SQUARE = '4';
     private static final char MOVE_ON_FREE_SQUARE = '5';
-    private static final char PLAYER_WIN = '6';
+    private static final char MATCH_LEFT = '0';
 
-    private static final GameController instance = new GameController();
 
-    public static final int GRID_SIZE = 10;
+    public static final int GRID_SIZE = 7;
+    private static final int WIN = 10;
+
+    private GameActivity activity;
 
     private final ArrayList<Player> players = new ArrayList<>();
     private Player activePlayer;
+    private String winner;
 
+    private boolean winIsReached = false;
+    private boolean hasLeftQueue = false;
+
+    private static final GameController instance = new GameController();
     public static GameController getInstance() {
         return instance;
     }
 
 
 
-    public void lookForMatch (GameActivity activity) {
+    private GameController() {}
+
+    public void setActivity(GameActivity activity) {
+        this.activity = activity;
+    }
+
+
+
+    public void lookForMatch () {
+
+        String readVal;
 
         ConnectionHandler.write(LOOK_FOR_MATCH);
 
         try {
-            String readVal = ConnectionHandler.read();
-            if (MATCH_FOUND.equals(readVal)) {
-                ConnectionHandler.write(ACK);
+            readVal = ConnectionHandler.read();
+            Log.d(TAG, "lookForMatch: " + readVal);
+            if (LEAVE_QUEUE.equals(readVal)) {
+                hasLeftQueue = true;
+            }
+            else {
+                hasLeftQueue = false;
                 activity.runOnUiThread(activity::dismissProgressDialog);
-            } else {
-                activity.runOnUiThread(() -> {
-                    activity.dismissProgressDialog();
-                    Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show();
-                });
             }
         }
         catch (IOException e) {
@@ -65,7 +84,20 @@ public class GameController {
 
     }
 
-    public void getPlayerData (GameActivity activity) {
+
+    public void stopLookingForMatch () {
+
+        new Thread(() -> ConnectionHandler.write(STOP_LOOKING_FOR_MATCH)).start();
+
+        hasLeftQueue = false;
+        activity.startActivity(new Intent(activity, MainActivity.class));
+        activity.finishAffinity();
+        Toast.makeText(activity, "Ricerca partita interrotta", Toast.LENGTH_SHORT).show();
+
+    }
+
+
+    public void getPlayerData () {
 
         if (!players.isEmpty()) {
             throw new IllegalArgumentException("Dati già ottenuti");
@@ -76,16 +108,15 @@ public class GameController {
 
         String nickname;
         String symbol;
-        int x;
-        int y;
-        int position;
+        int x, y, position;
 
         while (true) {
 
             try {
 
                 playerData = ConnectionHandler.read();
-                ConnectionHandler.write(ACK);
+                Log.d(TAG, "PLAYER DATA: " + playerData);
+                //ConnectionHandler.write(ACK);
 
                 if ("|".equals(playerData) || playerData == null) break;
 
@@ -95,7 +126,7 @@ public class GameController {
                 symbol = playerData_tokens[1];
                 x = Integer.parseInt(playerData_tokens[2]);
                 y = Integer.parseInt(playerData_tokens[3]);
-                position = 10*x + y;
+                position = GRID_SIZE * x + y;
 
                 players.add(new Player(nickname, symbol, position));
 
@@ -106,10 +137,10 @@ public class GameController {
 
         }
 
-        activity.runOnUiThread(() -> setGridToInitialPositions(activity));
-
     }
-    private void setGridToInitialPositions (GameActivity activity) {
+
+
+    public void setGridToInitialPositions () {
 
         GridLayout grid = activity.getGrid();
 
@@ -119,15 +150,18 @@ public class GameController {
 
             playerSquare = (TextView) grid.getChildAt(p.getPosition());
 
-            playerSquare.setText(p.getSymbol());
-
-            playerSquare.setTextColor(p.getColor());
+            final TextView playerSquare_final = playerSquare;
+            activity.runOnUiThread(() -> {
+                playerSquare_final.setText(p.getSymbol());
+                playerSquare_final.setTextColor(p.getColor());
+            });
 
         }
 
     }
 
-    public void play (GameActivity activity) {
+
+    public void play () {
 
         String serverMessage = "";
         char[] serverMessage_array;
@@ -135,11 +169,11 @@ public class GameController {
         char action;
         int activePlayer_index;
 
-        while (true) {
+        while (!winIsReached) {
 
             try {
                 serverMessage = ConnectionHandler.read();
-                ConnectionHandler.write(ACK);
+                Log.d(TAG, "PLAY - SERVER MESSAGE: " + serverMessage);
             } catch (IOException e) {
                 activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
                 e.printStackTrace();
@@ -148,50 +182,56 @@ public class GameController {
             serverMessage_array = serverMessage.toCharArray();
 
             action = serverMessage_array[0];
+            Log.d(TAG, "ACTION: " + action);
 
             switch (action) {
 
-                case RECIEVE_ACTIVE_PLAYER:
+                case RECEIVE_ACTIVE_PLAYER:
                     activePlayer_index = Integer.parseInt(serverMessage.substring(1));
-                    setActivePlayerAndButtons(activity, activePlayer_index);
+                    setActivePlayerAndButtons(activePlayer_index);
                 break;
 
                 case SUCCESSFUL_ATTACK:
-                    updateGridAfterSuccessfulAttack(activity, serverMessage);
+                    updateGridAfterSuccessfulAttack(serverMessage);
                 break;
 
                 case FAILED_ATTACK:
-                    updateGridAfterFailedAttack(activity, serverMessage);
+                    updateGridAfterFailedAttack(serverMessage);
                 break;
 
                 case MOVE_ON_OWN_SQUARE:
-                    updateGridAfterMoveToFreeOrOwnSquare(activity, serverMessage, false);
+                    updateGridAfterMoveToFreeOrOwnSquare(serverMessage, false);
                 break;
 
                 case MOVE_ON_FREE_SQUARE:
-                    updateGridAfterMoveToFreeOrOwnSquare(activity, serverMessage, true);
+                    updateGridAfterMoveToFreeOrOwnSquare(serverMessage, true);
                 break;
 
-                case PLAYER_WIN:
+                case MATCH_LEFT:
+                    clear();
+                    goToMainActivity();
+                    return;
 
-                break;
             }
+
         }
 
+        showWinner();
+
     }
-    private void setActivePlayerAndButtons(GameActivity activity, int index) {
+    private void setActivePlayerAndButtons(int index) {
         activity.runOnUiThread(() -> {
             activePlayer = players.get(index);
-            if (activePlayer.getNickname().equals(AuthenticationHandler.getCurrUser())) {
+            Log.d(TAG, "UNO - ACTIVE PLAYER SET: " + index);
+            if (activePlayer.getNickname().equals(AuthHandler.getCurrUser())) {
                 Toast.makeText(activity, "È il tuo turno", Toast.LENGTH_SHORT).show();
                 activity.enableButtons(true);
             } else {
                 activity.enableButtons(false);
             }
         });
-
     }
-    private void updateGridAfterSuccessfulAttack (GameActivity activity, String serverData) {
+    private void updateGridAfterSuccessfulAttack (String serverData) {
 
         char[] serverData_array = serverData.toCharArray();
 
@@ -218,8 +258,12 @@ public class GameController {
         });
 
         activePlayer.addTerritory();
+        if (activePlayer.getTerritories() == WIN) {
+            winIsReached = true;
+            winner = activePlayer.getNickname();
+        }
         defendingPlayer.removeTerritory();
-        activePlayer.move(direction);
+        activePlayer.changePosition(GRID_SIZE, direction);
 
         activePlayer_oldSquare = (TextView) activity.getGrid().getChildAt(oldPosition);
         activePlayer_newSquare = (TextView) activity.getGrid().getChildAt(activePlayer.getPosition());
@@ -230,10 +274,11 @@ public class GameController {
             }
             activePlayer_newSquare.setText(activePlayer.getSymbol());
             activePlayer_newSquare.setTextColor(activePlayer.getColor());
+            Log.d(TAG, "DUE - GRID UPDATED AFTER SUCCESSFUL ATTACK. OLDPOS: " + oldPosition + " NEWPOS: " + activePlayer.getPosition());
         });
 
     }
-    private void updateGridAfterFailedAttack (GameActivity activity, String serverData) {
+    private void updateGridAfterFailedAttack (String serverData) {
 
         char[] serverData_array = serverData.toCharArray();
 
@@ -246,7 +291,7 @@ public class GameController {
         });
 
     }
-    private void updateGridAfterMoveToFreeOrOwnSquare (GameActivity activity, String serverData, boolean free) {
+    private void updateGridAfterMoveToFreeOrOwnSquare (String serverData, boolean free) {
 
         char[] serverData_array = serverData.toCharArray();
 
@@ -259,9 +304,13 @@ public class GameController {
 
         direction = serverData_array[1];
 
-        activePlayer.move(direction);
+        activePlayer.changePosition(GRID_SIZE, direction);
         if (free) {
             activePlayer.addTerritory();
+            if (activePlayer.getTerritories() == WIN) {
+                winIsReached = true;
+                winner = activePlayer.getNickname();
+            }
         }
 
         activePlayer_oldSquare = (TextView) activity.getGrid().getChildAt(oldPosition);
@@ -275,14 +324,25 @@ public class GameController {
                 activePlayer_newSquare.setText(activePlayer.getSymbol());
             }
             activePlayer_newSquare.setTextColor(activePlayer.getColor());
+            Log.d(TAG, "DUE - GRID UPDATED AFTER CONQUERING " + (free ? "FREE" : "OWN") + " SQUARE. OLDPOS: " + oldPosition + " NEWPOS: " + activePlayer.getPosition());
         });
 
     }
-    private void endMatch (GameActivity activity) {
-
+    private void showWinner() {
+        activity.runOnUiThread(() -> {
+            goToWinnerActivity();
+            clear();
+            Log.d(TAG, "ENDING MATCH");
+        });
+    }
+    private void clear() {
+        players.clear();
+        activePlayer = null;
+        winner = null;
+        winIsReached = false;
     }
 
-    public void makeMove (GameActivity activity, char direction) {
+    public void makeMove (char direction) {
 
         if (direction != 'N' &&
             direction != 'S' &&
@@ -291,12 +351,12 @@ public class GameController {
             throw new IllegalArgumentException("Direzione non valida");
         }
 
-        if (isValidMove(activity, direction)) {
-            ConnectionHandler.write(String.valueOf(direction));
+        if (isValidMove(direction)) {
+            ConnectionHandler.write(GAME_ACTION + direction);
         }
 
     }
-    private boolean isValidMove (GameActivity activity, char direction) {
+    private boolean isValidMove (char direction) {
 
         switch (direction) {
 
@@ -331,6 +391,36 @@ public class GameController {
         }
         return true;
 
+    }
+
+
+    public void leaveMatch() {
+
+        new Thread(() -> ConnectionHandler.write(LEAVE_MATCH)).start();
+
+    }
+
+
+    private void goToMainActivity() {
+        activity.runOnUiThread(() -> {
+            activity.startActivity(new Intent(activity, MainActivity.class));
+            activity.finishAffinity();
+            Toast.makeText(activity, "Partita abbandonata", Toast.LENGTH_SHORT).show();
+        });
+
+    }
+    private void goToWinnerActivity() {
+        activity.runOnUiThread(() -> {
+            Intent intent = new Intent(activity, WinnerActivity.class);
+            intent.putExtra("winner", winner);
+            activity.startActivity(intent);
+            activity.finishAffinity();
+        });
+    }
+
+
+    boolean hasLeftQueue() {
+        return hasLeftQueue;
     }
 
 }

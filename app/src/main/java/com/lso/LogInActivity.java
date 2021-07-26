@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -66,17 +65,17 @@ public class LogInActivity extends AppCompatActivity {
 
             new Thread(() -> {
                 while (true) {
-                    int loginOutcome = AuthenticationHandler.logIn(nick, pswd);
-                    if (loginOutcome == 0) {
-                        AuthenticationHandler.setCurrUser(nick);
+                    int loginOutcome = AuthHandler.logIn(nick, pswd);
+                    if (loginOutcome == AuthHandler.LOGIN_SUCCESS) {
+                        AuthHandler.setCurrUser(nick);
                         goToMainActivity();
                         runOnUiThread(() -> Toast.makeText(this, nick + " ha effettuato il login", Toast.LENGTH_SHORT).show());
                     }
-                    else if (loginOutcome == 1) {
-                        runOnUiThread(() -> pswdInput.setError("Password errata"));
-                    }
-                    else if (loginOutcome == 2) {
+                    else if (loginOutcome == AuthHandler.USER_DOESNT_EXIST) {
                         runOnUiThread(() -> nickInput.setError("Non esiste un account con questo nome"));
+                    }
+                    else if (loginOutcome == AuthHandler.WRONG_PASSWORD) {
+                        runOnUiThread(() -> pswdInput.setError("Password errata"));
                     }
                     else {
                         ConnectionHandler.stopConnection();

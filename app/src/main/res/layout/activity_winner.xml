@@ -6,4 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".WinnerActivity">
 
+    <Button
+        android:id="@+id/torna_al_menu_btn_winner"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:text="TORNA AL MENU"
+        android:textSize="20sp"
+        app:backgroundTint="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/winner_txtview"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/winner_txtview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="casual"
+        android:gravity="center"
+        android:text="VINCE IL GIOCATORE ---------------------"
+        android:textSize="40sp"
+        android:textColor="@color/red"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.246"
+        tools:fontFamily="casual"
+        tools:ignore="HardcodedText" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

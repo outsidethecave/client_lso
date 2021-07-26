@@ -1,13 +1,16 @@
 package com.lso;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.gridlayout.widget.GridLayout;
@@ -19,14 +22,16 @@ public class GameActivity extends AppCompatActivity {
     private final GameController controller = GameController.getInstance();
 
     private GridLayout grid;
+
     private Button north_btn;
     private Button south_btn;
     private Button east_btn;
     private Button west_btn;
+
     private TextView atk_txtview;
     private TextView def_txtview;
-    private ProgressDialog progressDialog;
 
+    private ProgressDialog progressDialog;
 
 
     @Override
@@ -34,6 +39,8 @@ public class GameActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        controller.setActivity(this);
 
         initButtons();
         initAtkDefViews();
@@ -44,17 +51,37 @@ public class GameActivity extends AppCompatActivity {
 
         new Thread(() -> {
 
-            controller.lookForMatch(this);
+            controller.lookForMatch();
 
-            controller.getPlayerData(this);
+            Log.d(TAG, "onCreate: LEFT QUEUE? " + controller.hasLeftQueue());
 
-            controller.play(this);
+            if (!controller.hasLeftQueue()) {
+
+                controller.getPlayerData();
+
+                controller.setGridToInitialPositions();
+
+                controller.play();
+
+            }
 
         }).start();
 
     }
 
 
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Abbandona Partita");
+        builder.setMessage("Vuoi uscire dalla partita?");
+        builder.setPositiveButton("Abbandona", (dialog, id) -> {
+            controller.leaveMatch();
+            super.onBackPressed();
+        });
+
+        builder.show();
+    }
 
     private void initButtons () {
         north_btn = findViewById(R.id.north_btn);
@@ -63,10 +90,10 @@ public class GameActivity extends AppCompatActivity {
         west_btn = findViewById(R.id.west_btn);
 
         // Un po confusionario ma non potevo non usare la doppia lambda
-        north_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove(this, 'N')).start());
-        south_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove(this, 'S')).start());
-        east_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove(this, 'E')).start());
-        west_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove(this, 'O')).start());
+        north_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove('N')).start());
+        south_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove('S')).start());
+        east_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove('E')).start());
+        west_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove('O')).start());
     }
 
     private void initAtkDefViews () {
@@ -104,6 +131,7 @@ public class GameActivity extends AppCompatActivity {
     private void setProgressDialog () {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Ricerca partecipanti in corso...");
+        progressDialog.setOnCancelListener(dialog -> controller.stopLookingForMatch());
     }
 
     public void enableButtons (boolean enabled) {

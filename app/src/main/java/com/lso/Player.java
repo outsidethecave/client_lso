@@ -6,27 +6,39 @@ import java.util.Random;
 
 public class Player {
 
-    private String nickname;
-    private String symbol;
+    private final String nickname;
+    private final String symbol;
     private int territories = 1;
     private int position;
-    private int color;
+    private final int color;
+
+
+    public Player (String nickname, String symbol, int position) {
+        this.nickname = nickname;
+        this.symbol = symbol;
+        this.position = position;
+
+        Random rnd = new Random();
+        this.color = Color.rgb(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+    }
+
 
     public String getNickname() {
         return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
     }
 
     public String getSymbol() {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public int getPosition() {
+        return position;
     }
+
+    public int getColor() {
+        return color;
+    }
+
 
     public void addTerritory () {
         territories++;
@@ -36,11 +48,12 @@ public class Player {
         territories--;
     }
 
-    public int getPosition() {
-        return position;
+    public int getTerritories () {
+        return territories;
     }
 
-    public void move (char direction) {
+
+    public void changePosition(int gridsize, char direction) {
         switch (direction) {
             case 'N':
                 position -= 1;
@@ -49,29 +62,12 @@ public class Player {
                 position += 1;
                 break;
             case 'O':
-                position -= 10;
+                position -= gridsize;
                 break;
             case 'E':
-                position += 10;
+                position += gridsize;
                 break;
         }
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
-    }
-
-    public Player (String nickname, String symbol, int position) {
-        this.nickname = nickname;
-        this.symbol = symbol;
-        this.position = position;
-
-        Random rnd = new Random();
-        this.color = Color.rgb(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
     }
 
 }

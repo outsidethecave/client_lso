@@ -1,18 +1,14 @@
 package com.lso;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.TextView;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,9 +23,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.logout_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected (@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.logout) {
+            AuthHandler.logOut(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onBackPressed () {
         moveTaskToBack(true);
     }
+
+
 
     private void setActiveUsersButton () {
         Button activeUsersBtn = findViewById(R.id.visualizza_utenti_btn);
