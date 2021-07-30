@@ -22,10 +22,11 @@ public class AuthHandler {
     public static final int WRONG_PASSWORD = 2;
     public static final int GENERIC_LOGIN_FAILURE = 3;
 
-    public static final int LOGOUT = 7;
+    public static final int LOGOUT = 8;
 
 
     public static String currUser;
+
 
 
     public static int addUser (String nick, String pswd) {
@@ -39,28 +40,33 @@ public class AuthHandler {
                 return USER_ALREADY_EXISTS;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ConnectionHandler.stopConnection();
             return GENERIC_SIGNUP_FAILURE;
         }
         return GENERIC_SIGNUP_FAILURE;
     }
 
     public static int logIn (String nick, String pswd) {
+
+        String outcome;
+        int outcome_int;
+
         ConnectionHandler.write(LOGIN + nick + SEPARATOR + pswd);
         try {
-            int outcome = Integer.parseInt(ConnectionHandler.read());
-            Log.d(TAG, "LOGIN OUTCOME: " + outcome);
-            if (outcome == LOGIN_SUCCESS) {
+            outcome = ConnectionHandler.read();
+            if (outcome == null) throw new IOException();
+            outcome_int = Integer.parseInt(outcome);
+            if (outcome_int == LOGIN_SUCCESS) {
                 return LOGIN_SUCCESS;
             }
-            else if (outcome == USER_DOESNT_EXIST) {
+            else if (outcome_int == USER_DOESNT_EXIST) {
                 return USER_DOESNT_EXIST;
             }
-            else if (outcome == WRONG_PASSWORD) {
+            else if (outcome_int == WRONG_PASSWORD) {
                 return WRONG_PASSWORD;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ConnectionHandler.stopConnection();
             return GENERIC_LOGIN_FAILURE;
         }
         return GENERIC_LOGIN_FAILURE;

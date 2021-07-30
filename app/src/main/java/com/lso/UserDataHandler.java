@@ -16,7 +16,8 @@ public class UserDataHandler {
        try {
            while (true) {
                readVal = ConnectionHandler.read();
-               if ("|".equals(readVal) || readVal == null) break;
+               if (readVal == null) throw new IOException();
+               if ("|".equals(readVal)) break;
                activeUsers.add(readVal);
            }
        }

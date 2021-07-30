@@ -21,7 +21,7 @@ public class GameController {
 
     private static final String LEAVE_QUEUE = "1";
 
-    private static final String LEAVE_MATCH = "8";
+    private static final String LEAVE_MATCH = "7";
 
     private static final char RECEIVE_ACTIVE_PLAYER = '1';
     private static final char SUCCESSFUL_ATTACK = '2';
@@ -58,7 +58,31 @@ public class GameController {
 
 
 
-    public void lookForMatch () {
+    public void play () {
+
+        activity.showProgressDialog();
+
+        new Thread(() -> {
+
+            lookForMatch();
+
+            if (!hasLeftQueue) {
+
+                getPlayerData();
+
+                setGridToInitialPositions();
+
+                startGame();
+
+            }
+
+            hasLeftQueue = false;
+
+        }).start();
+
+    }
+
+    private void lookForMatch () {
 
         String readVal;
 
@@ -76,12 +100,15 @@ public class GameController {
             }
         }
         catch (IOException e) {
+            e.printStackTrace();
             activity.runOnUiThread(() -> {
                 activity.dismissProgressDialog();
-                Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Errore di connessione", Toast.LENGTH_SHORT).show();
             });
+            clear();
+            activity.startActivity(new Intent(activity, ConnectionActivity.class));
+            activity.finishAffinity();
         }
-
     }
 
 
@@ -97,7 +124,7 @@ public class GameController {
     }
 
 
-    public void getPlayerData () {
+    private void getPlayerData () {
 
         if (!players.isEmpty()) {
             throw new IllegalArgumentException("Dati già ottenuti");
@@ -118,7 +145,8 @@ public class GameController {
                 Log.d(TAG, "PLAYER DATA: " + playerData);
                 //ConnectionHandler.write(ACK);
 
-                if ("|".equals(playerData) || playerData == null) break;
+                if ("|".equals(playerData)) break;
+                if (playerData == null) throw new IOException();
 
                 playerData_tokens = playerData.split("\\|");    // Separatore
 
@@ -131,8 +159,14 @@ public class GameController {
                 players.add(new Player(nickname, symbol, position));
 
             } catch (IOException e) {
-                activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
                 e.printStackTrace();
+                activity.runOnUiThread(() -> {
+                    Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show();
+                });
+                clear();
+                activity.startActivity(new Intent(activity, ConnectionActivity.class));
+                activity.finishAffinity();
+                break;
             }
 
         }
@@ -140,7 +174,7 @@ public class GameController {
     }
 
 
-    public void setGridToInitialPositions () {
+    private void setGridToInitialPositions () {
 
         GridLayout grid = activity.getGrid();
 
@@ -161,7 +195,7 @@ public class GameController {
     }
 
 
-    public void play () {
+    private void startGame() {
 
         String serverMessage = "";
         char[] serverMessage_array;
@@ -172,11 +206,18 @@ public class GameController {
         while (!winIsReached) {
 
             try {
+                Log.d(TAG, "PLAY - ENTERING READ");
                 serverMessage = ConnectionHandler.read();
+                if (serverMessage == null) throw new IOException();
                 Log.d(TAG, "PLAY - SERVER MESSAGE: " + serverMessage);
             } catch (IOException e) {
-                activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
                 e.printStackTrace();
+                activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
+
+                clear();
+                activity.startActivity(new Intent(activity, ConnectionActivity.class));
+                activity.finishAffinity();
+                break;
             }
 
             serverMessage_array = serverMessage.toCharArray();
@@ -416,11 +457,6 @@ public class GameController {
             activity.startActivity(intent);
             activity.finishAffinity();
         });
-    }
-
-
-    boolean hasLeftQueue() {
-        return hasLeftQueue;
     }
 
 }

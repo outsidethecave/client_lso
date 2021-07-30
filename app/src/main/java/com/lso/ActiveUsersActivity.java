@@ -20,9 +20,10 @@ import java.util.List;
 public class ActiveUsersActivity extends AppCompatActivity {
 
     private static final String TAG = ActiveUsersActivity.class.getSimpleName();
-    UsersAdapter adapter;
-    RecyclerView recyclerView;
-    List<String> utenti = new ArrayList<>();
+
+    private UsersAdapter adapter;
+    private RecyclerView recyclerView;
+    private final List<String> utenti = new ArrayList<>();
 
 
     @Override
@@ -47,9 +48,6 @@ public class ActiveUsersActivity extends AppCompatActivity {
             if (!usersFetched) {
                 ConnectionHandler.stopConnection();
                 runOnUiThread(() -> {
-                    // CurrUser = NULL;
-                    // utenti.remove(CurrUser) [?];
-                    // adapter.notifyDataSetChanged() o quello che è
                     Toast.makeText(this, "Errore di connessione", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(this, ConnectionActivity.class));
                     finishAffinity();
@@ -60,6 +58,7 @@ public class ActiveUsersActivity extends AppCompatActivity {
             }
         }).start();
     }
+
 
     public static class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> {
 

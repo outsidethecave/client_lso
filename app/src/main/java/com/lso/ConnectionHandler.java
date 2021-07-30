@@ -24,13 +24,12 @@ public class ConnectionHandler {
 
         clientSocket = new Socket();
         try {
-            clientSocket.connect(new InetSocketAddress(SERVER_IP, SERVER_PORT), 1000);
+            clientSocket.connect(new InetSocketAddress(SERVER_IP, SERVER_PORT), 5000);
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             return true;
         } catch (IOException e) {
             e.printStackTrace();
-            stopConnection();
             return false;
         }
 

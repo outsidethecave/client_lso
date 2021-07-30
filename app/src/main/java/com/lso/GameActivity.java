@@ -1,7 +1,6 @@
 package com.lso;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,25 +46,7 @@ public class GameActivity extends AppCompatActivity {
         initGrid();
         setProgressDialog();
 
-        progressDialog.show();
-
-        new Thread(() -> {
-
-            controller.lookForMatch();
-
-            Log.d(TAG, "onCreate: LEFT QUEUE? " + controller.hasLeftQueue());
-
-            if (!controller.hasLeftQueue()) {
-
-                controller.getPlayerData();
-
-                controller.setGridToInitialPositions();
-
-                controller.play();
-
-            }
-
-        }).start();
+        controller.play();
 
     }
 
@@ -73,12 +54,14 @@ public class GameActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
         builder.setTitle("Abbandona Partita");
         builder.setMessage("Vuoi uscire dalla partita?");
         builder.setPositiveButton("Abbandona", (dialog, id) -> {
             controller.leaveMatch();
             super.onBackPressed();
         });
+        builder.setNegativeButton("Resta", null);
 
         builder.show();
     }
@@ -142,8 +125,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
 
-
-    public void dismissProgressDialog() {
+    public void showProgressDialog () {progressDialog.show();}
+    public void dismissProgressDialog () {
         progressDialog.dismiss();
     }
 
