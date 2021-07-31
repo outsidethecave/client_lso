@@ -2,6 +2,7 @@ package com.lso;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,20 +24,23 @@ public class GameController {
 
     private static final String LEAVE_MATCH = "7";
 
-    private static final char RECEIVE_ACTIVE_PLAYER = '1';
+    private static final char RECEIVE_ACTIVE_PLAYER_AND_TIME = '1';
     private static final char SUCCESSFUL_ATTACK = '2';
     private static final char FAILED_ATTACK = '3';
     private static final char MOVE_ON_OWN_SQUARE = '4';
     private static final char MOVE_ON_FREE_SQUARE = '5';
+    private static final char TIME_ENDED = '6';
     private static final char MATCH_LEFT = '0';
 
 
     public static final int GRID_SIZE = 7;
-    private static final int WIN = 10;
+    private static final int WIN = 5;
 
     private GameActivity activity;
 
     private final ArrayList<Player> players = new ArrayList<>();
+
+    private CountDownTimer timer;
     private Player activePlayer;
     private String winner;
 
@@ -82,6 +86,7 @@ public class GameController {
 
     }
 
+
     private void lookForMatch () {
 
         String readVal;
@@ -110,8 +115,6 @@ public class GameController {
             activity.finishAffinity();
         }
     }
-
-
     public void stopLookingForMatch () {
 
         new Thread(() -> ConnectionHandler.write(STOP_LOOKING_FOR_MATCH)).start();
@@ -122,7 +125,6 @@ public class GameController {
         Toast.makeText(activity, "Ricerca partita interrotta", Toast.LENGTH_SHORT).show();
 
     }
-
 
     private void getPlayerData () {
 
@@ -143,7 +145,6 @@ public class GameController {
 
                 playerData = ConnectionHandler.read();
                 Log.d(TAG, "PLAYER DATA: " + playerData);
-                //ConnectionHandler.write(ACK);
 
                 if ("|".equals(playerData)) break;
                 if (playerData == null) throw new IOException();
@@ -173,7 +174,6 @@ public class GameController {
 
     }
 
-
     private void setGridToInitialPositions () {
 
         GridLayout grid = activity.getGrid();
@@ -194,10 +194,10 @@ public class GameController {
 
     }
 
-
     private void startGame() {
 
-        String serverMessage = "";
+        String serverMessage;
+        long timerEnd;
         char[] serverMessage_array;
 
         char action;
@@ -206,18 +206,24 @@ public class GameController {
         while (!winIsReached) {
 
             try {
-                Log.d(TAG, "PLAY - ENTERING READ");
+
                 serverMessage = ConnectionHandler.read();
+
                 if (serverMessage == null) throw new IOException();
+
                 Log.d(TAG, "PLAY - SERVER MESSAGE: " + serverMessage);
+
             } catch (IOException e) {
                 e.printStackTrace();
+
+                if (timer != null) timer.cancel();
+
                 activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
 
                 clear();
                 activity.startActivity(new Intent(activity, ConnectionActivity.class));
                 activity.finishAffinity();
-                break;
+                return;
             }
 
             serverMessage_array = serverMessage.toCharArray();
@@ -227,30 +233,46 @@ public class GameController {
 
             switch (action) {
 
-                case RECEIVE_ACTIVE_PLAYER:
-                    activePlayer_index = Integer.parseInt(serverMessage.substring(1));
-                    setActivePlayerAndButtons(activePlayer_index);
+                case RECEIVE_ACTIVE_PLAYER_AND_TIME:
+                    cancelTimer(timer);
+                    activePlayer_index = Integer.parseInt(serverMessage.substring(1, 3));
+                    timerEnd = Long.parseLong(serverMessage.substring(3));
+                    setActivePlayerAndButtonsAndTime(activePlayer_index, timerEnd);
                 break;
 
                 case SUCCESSFUL_ATTACK:
+                    cancelTimer(timer);
                     updateGridAfterSuccessfulAttack(serverMessage);
                 break;
 
                 case FAILED_ATTACK:
+                    cancelTimer(timer);
                     updateGridAfterFailedAttack(serverMessage);
                 break;
 
                 case MOVE_ON_OWN_SQUARE:
+                    cancelTimer(timer);
                     updateGridAfterMoveToFreeOrOwnSquare(serverMessage, false);
                 break;
 
                 case MOVE_ON_FREE_SQUARE:
+                    cancelTimer(timer);
                     updateGridAfterMoveToFreeOrOwnSquare(serverMessage, true);
                 break;
 
+                case TIME_ENDED:
+                    if (activePlayer.getNickname().equals(AuthHandler.currUser)) {
+                        activity.runOnUiThread(() -> Toast.makeText(activity, "Tempo scaduto!", Toast.LENGTH_SHORT).show());
+                    }
+                break;
+
                 case MATCH_LEFT:
+                    cancelTimer(timer);
                     clear();
                     goToMainActivity();
+                    return;
+
+                default:
                     return;
 
             }
@@ -260,8 +282,9 @@ public class GameController {
         showWinner();
 
     }
-    private void setActivePlayerAndButtons(int index) {
+    private void setActivePlayerAndButtonsAndTime(int index, long timerEnd) {
         activity.runOnUiThread(() -> {
+            timer = startTimer(timerEnd);
             activePlayer = players.get(index);
             Log.d(TAG, "UNO - ACTIVE PLAYER SET: " + index);
             if (activePlayer.getNickname().equals(AuthHandler.getCurrUser())) {
@@ -381,6 +404,29 @@ public class GameController {
         activePlayer = null;
         winner = null;
         winIsReached = false;
+    }
+
+    private CountDownTimer startTimer (long timerEnd) {
+        long runTime = timerEnd * 1000 - System.currentTimeMillis();
+
+        return new CountDownTimer(runTime, 1000) {
+
+            @Override
+            public void onTick (long millisUntilFinished) {
+                activity.setText_time(millisUntilFinished/1000);
+            }
+
+            @Override
+            public void onFinish () {
+                // Se la vede il server
+            }
+
+        }.start();
+    }
+    private void cancelTimer (CountDownTimer timer) {
+        if (timer != null) {
+            timer.cancel();
+        }
     }
 
     public void makeMove (char direction) {

@@ -82,7 +82,12 @@ public class RegistrationActivity extends AppCompatActivity {
                     while (true) {
                         int addUserOutcome = AuthHandler.addUser(nick, pswd1);
                         if (addUserOutcome == AuthHandler.SIGNUP_SUCCESS) {
-                            runOnUiThread(() -> Toast.makeText(this, "Utente registrato", Toast.LENGTH_SHORT).show());
+                            runOnUiThread(() -> {
+                                nickInput.getEditText().setText("");
+                                pswd1Input.getEditText().setText("");
+                                pswd2Input.getEditText().setText("");
+                                Toast.makeText(this, "Utente registrato", Toast.LENGTH_SHORT).show();
+                            });
                         }
                         else if (addUserOutcome == AuthHandler.USER_ALREADY_EXISTS) {
                             runOnUiThread(() -> nickInput.setError("Questo nickname è già esistente"));

@@ -30,6 +30,8 @@ public class GameActivity extends AppCompatActivity {
     private TextView atk_txtview;
     private TextView def_txtview;
 
+    private TextView time_txtview;
+
     private ProgressDialog progressDialog;
 
 
@@ -42,7 +44,7 @@ public class GameActivity extends AppCompatActivity {
         controller.setActivity(this);
 
         initButtons();
-        initAtkDefViews();
+        initAtkDefTimeViews();
         initGrid();
         setProgressDialog();
 
@@ -79,9 +81,10 @@ public class GameActivity extends AppCompatActivity {
         west_btn.setOnClickListener(v -> new Thread(() -> controller.makeMove('O')).start());
     }
 
-    private void initAtkDefViews () {
-        atk_txtview = (TextView) findViewById(R.id.atk_txtview);
-        def_txtview = (TextView) findViewById(R.id.def_txtview);
+    private void initAtkDefTimeViews () {
+        atk_txtview = findViewById(R.id.atk_txtview);
+        def_txtview = findViewById(R.id.def_txtview);
+        time_txtview = findViewById(R.id.time_txtview);
     }
 
     private void initGrid () {
@@ -137,6 +140,12 @@ public class GameActivity extends AppCompatActivity {
     public void setText_def (char def) {
         def_txtview.setText(String.valueOf(def));
     }
+
+    public void setText_time (long secs) {
+        String timeleft = "00 : " + (secs >= 10 ? secs : "0" + secs);
+        time_txtview.setText(timeleft);
+    }
+
 
     public GridLayout getGrid() {
         return grid;
