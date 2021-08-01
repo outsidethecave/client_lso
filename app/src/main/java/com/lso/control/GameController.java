@@ -119,7 +119,7 @@ public class GameController {
             e.printStackTrace();
             activity.runOnUiThread(() -> {
                 activity.dismissProgressDialog();
-                Toast.makeText(activity, "Errore di connessione", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
             });
             clear();
             activity.startActivity(new Intent(activity, ConnectionActivity.class));
@@ -174,7 +174,7 @@ public class GameController {
 
             } catch (IOException e) {
                 e.printStackTrace();
-                activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
+                activity.runOnUiThread(() -> Toast.makeText(activity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show());
                 clear();
                 activity.startActivity(new Intent(activity, ConnectionActivity.class));
                 activity.finishAffinity();
@@ -255,7 +255,7 @@ public class GameController {
 
                 if (timer != null) timer.cancel();
 
-                activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
+                activity.runOnUiThread(() -> Toast.makeText(activity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show());
 
                 clear();
                 activity.startActivity(new Intent(activity, ConnectionActivity.class));

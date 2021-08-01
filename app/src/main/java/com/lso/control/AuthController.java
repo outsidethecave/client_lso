@@ -67,7 +67,7 @@ public class AuthController {
                     }
                     registrationActivity.runOnUiThread(() -> {
                         registrationActivity.dismissProgressDialog();
-                        Toast.makeText(registrationActivity, "Errore di connessione", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(registrationActivity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
                         registrationActivity.startActivity(new Intent(registrationActivity, ConnectionActivity.class));
                         registrationActivity.finishAffinity();
                     });
@@ -104,7 +104,7 @@ public class AuthController {
                     }
                     loginActivity.runOnUiThread(() -> {
                         loginActivity.dismissProgressDialog();
-                        Toast.makeText(loginActivity, "Errore di connessione", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(loginActivity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
                         loginActivity.startActivity(new Intent(loginActivity, ConnectionActivity.class));
                         loginActivity.finishAffinity();
                     });

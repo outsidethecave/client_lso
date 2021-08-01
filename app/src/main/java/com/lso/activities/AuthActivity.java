@@ -19,6 +19,7 @@ public class AuthActivity extends AppCompatActivity {
         setLoginBtn();
     }
 
+
     private void setRegisterBtn () {
         Button registrati_btn = findViewById(R.id.registrati_btn_auth);
         registrati_btn.setOnClickListener(v -> startActivity(new Intent(AuthActivity.this, RegistrationActivity.class)));

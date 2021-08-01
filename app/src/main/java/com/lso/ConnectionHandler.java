@@ -11,8 +11,6 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-//
-
 public class ConnectionHandler {
 
     private static ConnectionActivity connectionActivity;
@@ -21,7 +19,7 @@ public class ConnectionHandler {
     private static final String SERVER_IP = "192.168.1.75";
     private static final int SERVER_PORT = 50000;
 
-    //private static final String CONNECTION_ERROR_MESSAGE;
+    public static final String CONNECTION_ERROR_MESSAGE = "Errore di connessione";
 
     private static Socket clientSocket;
     private static PrintWriter out;
@@ -54,7 +52,7 @@ public class ConnectionHandler {
             } else {
                 connectionActivity.runOnUiThread(() -> {
                     connectionActivity.dismissProgressDialog();
-                    Toast.makeText(connectionActivity, "Errore di connessione.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(connectionActivity, CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();

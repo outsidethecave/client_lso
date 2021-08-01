@@ -46,7 +46,6 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -61,6 +60,7 @@ public class GameActivity extends AppCompatActivity {
 
         builder.show();
     }
+
 
     private void initButtons () {
         north_btn = findViewById(R.id.north_btn);
@@ -103,11 +103,9 @@ public class GameActivity extends AppCompatActivity {
     public void setText_atk (char atk) {
         atk_txtview.setText(String.valueOf(atk));
     }
-
     public void setText_def (char def) {
         def_txtview.setText(String.valueOf(def));
     }
-
     public void setText_time (long secs) {
         String timeleft = "00 : " + (secs >= 10 ? secs : "0" + secs);
         time_txtview.setText(timeleft);

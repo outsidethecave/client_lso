@@ -38,7 +38,6 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
 
-
     private void setProgressDialog () {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Effettuando la registrazione...");
@@ -94,17 +93,17 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
 
+    public void clearInputs () {
+        nickInput.getEditText().setText("");
+        pswd1Input.getEditText().setText("");
+        pswd2Input.getEditText().setText("");
+    }
+
     public void showProgressDialog () {
         progressDialog.show();
     }
     public void dismissProgressDialog () {
         progressDialog.dismiss();
-    }
-
-    public void clearInputs () {
-        nickInput.getEditText().setText("");
-        pswd1Input.getEditText().setText("");
-        pswd2Input.getEditText().setText("");
     }
 
     public TextInputLayout getNickInput() {

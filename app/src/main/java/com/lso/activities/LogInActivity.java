@@ -36,7 +36,6 @@ public class LogInActivity extends AppCompatActivity {
     }
 
 
-
     private void setBackToMenuButton() {
         Button torna_al_login_btn = findViewById(R.id.torna_al_menu_btn_login);
         torna_al_login_btn.setOnClickListener(v -> {

@@ -36,7 +36,7 @@ public class ConnectionActivity extends AppCompatActivity {
         Button connettitiButton = findViewById(R.id.connettiti_btn);
 
         connettitiButton.setOnClickListener(v -> ConnectionHandler.makeFirstConnection());
-        connettitiButton.performClick();
+        connettitiButton.callOnClick();
 
     }
 

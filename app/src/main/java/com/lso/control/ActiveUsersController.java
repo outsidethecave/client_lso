@@ -35,7 +35,7 @@ public class ActiveUsersController {
             if (!usersFetched) {
                 ConnectionHandler.stopConnection();
                 activity.runOnUiThread(() -> {
-                    Toast.makeText(activity, "Errore di connessione", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
                     activity.startActivity(new Intent(activity, ConnectionActivity.class));
                     activity.finishAffinity();
                 });
