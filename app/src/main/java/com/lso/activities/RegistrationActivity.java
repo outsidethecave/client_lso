@@ -1,4 +1,4 @@
-package com.lso;
+package com.lso.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -6,21 +6,30 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
+import com.lso.control.AuthController;
+import com.lso.InputErrorHelper;
+import com.lso.R;
+
+@SuppressWarnings("ConstantConditions")
 
 public class RegistrationActivity extends AppCompatActivity {
+
+    private final AuthController authController = AuthController.getInstance();
 
     private ProgressDialog progressDialog;
     private TextInputLayout nickInput;
     private TextInputLayout pswd1Input;
     private TextInputLayout pswd2Input;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
+
+        authController.setRegistrationActivity(this);
 
         setProgressDialog();
         setBackToMenuButton();
@@ -38,7 +47,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private void setBackToMenuButton() {
         Button torna_al_login_btn = findViewById(R.id.torna_al_menu_btn_reg);
         torna_al_login_btn.setOnClickListener(v -> {
-            startActivity(new Intent(RegistrationActivity.this, ConnectionActivity.class));
+            startActivity(new Intent(RegistrationActivity.this, AuthActivity.class));
             finishAffinity();
         });
     }
@@ -57,8 +66,6 @@ public class RegistrationActivity extends AppCompatActivity {
         Button registerButton = findViewById(R.id.registrati_btn_reg);
         registerButton.setOnClickListener(v -> {
 
-            progressDialog.show();
-
             nickInput.setError(null);
             pswd1Input.setError(null);
             pswd2Input.setError(null);
@@ -68,46 +75,17 @@ public class RegistrationActivity extends AppCompatActivity {
             String pswd2 = pswd2Input.getEditText().getText().toString();
 
             boolean exit = false;
-            if (!InputErrorHandler.isNickname(nick, nickInput)) {
+            if (!InputErrorHelper.isNickname(nick, nickInput)) {
                 exit = true;
             }
-            if (!InputErrorHandler.isPassword(pswd1, pswd1Input)) {
+            if (!InputErrorHelper.isPassword(pswd1, pswd1Input)) {
                 exit = true;
             }
-            if (!InputErrorHandler.passwordsMatch(pswd1, pswd2, pswd2Input)) {
+            if (!InputErrorHelper.passwordsMatch(pswd1, pswd2, pswd2Input)) {
                 exit = true;
             }
             if (!exit) {
-                new Thread(() -> {
-                    while (true) {
-                        int addUserOutcome = AuthHandler.addUser(nick, pswd1);
-                        if (addUserOutcome == AuthHandler.SIGNUP_SUCCESS) {
-                            runOnUiThread(() -> {
-                                nickInput.getEditText().setText("");
-                                pswd1Input.getEditText().setText("");
-                                pswd2Input.getEditText().setText("");
-                                Toast.makeText(this, "Utente registrato", Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                        else if (addUserOutcome == AuthHandler.USER_ALREADY_EXISTS) {
-                            runOnUiThread(() -> nickInput.setError("Questo nickname è già esistente"));
-                        }
-                        else {
-                            ConnectionHandler.stopConnection();
-                            if (ConnectionHandler.startConnection()) {
-                                continue;
-                            }
-                            runOnUiThread(() -> {
-                                progressDialog.dismiss();
-                                Toast.makeText(this, "Errore di connessione", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(this, ConnectionActivity.class));
-                                finishAffinity();
-                            });
-                        }
-                        runOnUiThread(() -> progressDialog.dismiss());
-                        break;
-                    }
-                }).start();
+                authController.register(nick, pswd1);
             }
             else {
                 progressDialog.dismiss();
@@ -115,4 +93,21 @@ public class RegistrationActivity extends AppCompatActivity {
         });
     }
 
+
+    public void showProgressDialog () {
+        progressDialog.show();
+    }
+    public void dismissProgressDialog () {
+        progressDialog.dismiss();
+    }
+
+    public void clearInputs () {
+        nickInput.getEditText().setText("");
+        pswd1Input.getEditText().setText("");
+        pswd2Input.getEditText().setText("");
+    }
+
+    public TextInputLayout getNickInput() {
+        return nickInput;
+    }
 }

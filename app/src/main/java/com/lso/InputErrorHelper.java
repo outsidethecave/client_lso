@@ -2,7 +2,7 @@ package com.lso;
 
 import com.google.android.material.textfield.TextInputLayout;
 
-public class InputErrorHandler {
+public class InputErrorHelper {
 
     public static boolean isNickname (String nick, TextInputLayout til) {
 
@@ -48,6 +48,7 @@ public class InputErrorHandler {
         }
         if (pswd.length() > 20) {
             til.setError("La password non può essere più lunga di 20 caratteri");
+            return false;
         }
         if (pswd.startsWith(" ") || pswd.endsWith(" ")) {
             til.setError("La password non può iniziare o finire con uno spazio");
@@ -55,7 +56,11 @@ public class InputErrorHandler {
         }
         if (pswd.contains("|")) {
             til.setError("La password non può contenere il carattere speciale |");
-
+            return false;
+        }
+        if (pswd.contains(" ")) {
+            til.setError("La password non può contenere spazi");
+            return false;
         }
         return true;
     }

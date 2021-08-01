@@ -7,12 +7,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="25dp"
-    tools:context=".RegistrationActivity">
+    tools:context=".activities.RegistrationActivity">
 
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="750dp"
-    tools:context=".RegistrationActivity">
+    tools:context=".activities.RegistrationActivity">
 
     <TextView
         android:id="@+id/conquer_txtview_reg"

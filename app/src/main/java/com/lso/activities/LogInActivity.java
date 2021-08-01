@@ -1,16 +1,21 @@
-package com.lso;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.lso.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputLayout;
+import com.lso.control.AuthController;
+import com.lso.R;
 
+@SuppressWarnings("ConstantConditions")
 public class LogInActivity extends AppCompatActivity {
+
+    private final AuthController authController = AuthController.getInstance();
 
     private ProgressDialog progressDialog;
     private TextInputLayout nickInput;
@@ -21,6 +26,8 @@ public class LogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
+
+        authController.setLoginActivity(this);
 
         setProgressDialog();
         setBackToMenuButton();
@@ -33,7 +40,7 @@ public class LogInActivity extends AppCompatActivity {
     private void setBackToMenuButton() {
         Button torna_al_login_btn = findViewById(R.id.torna_al_menu_btn_login);
         torna_al_login_btn.setOnClickListener(v -> {
-            startActivity(new Intent(LogInActivity.this, ConnectionActivity.class));
+            startActivity(new Intent(LogInActivity.this, AuthActivity.class));
             finishAffinity();
         });
     }
@@ -55,49 +62,44 @@ public class LogInActivity extends AppCompatActivity {
         Button loginBtn = findViewById(R.id.login_btn_login);
         loginBtn.setOnClickListener(v -> {
 
-            progressDialog.show();
-
             nickInput.setError(null);
             pswdInput.setError(null);
 
             String nick = nickInput.getEditText().getText().toString().trim();
             String pswd = pswdInput.getEditText().getText().toString();
 
-            new Thread(() -> {
-                while (true) {
-                    int loginOutcome = AuthHandler.logIn(nick, pswd);
-                    if (loginOutcome == AuthHandler.LOGIN_SUCCESS) {
-                        AuthHandler.setCurrUser(nick);
-                        goToMainActivity();
-                        runOnUiThread(() -> Toast.makeText(this, nick + " ha effettuato il login", Toast.LENGTH_SHORT).show());
-                    }
-                    else if (loginOutcome == AuthHandler.USER_DOESNT_EXIST) {
-                        runOnUiThread(() -> nickInput.setError("Non esiste un account con questo nome"));
-                    }
-                    else if (loginOutcome == AuthHandler.WRONG_PASSWORD) {
-                        runOnUiThread(() -> pswdInput.setError("Password errata"));
-                    }
-                    else {
-                        ConnectionHandler.stopConnection();
-                        if (ConnectionHandler.startConnection()) {
-                            continue;
-                        }
-                        runOnUiThread(() -> {
-                            progressDialog.dismiss();
-                            Toast.makeText(this, "Errore di connessione", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(this, ConnectionActivity.class));
-                            finishAffinity();
-                        });
-                    }
-                    runOnUiThread(() -> progressDialog.dismiss());
-                    break;
-                }
-            }).start();
+            if (nick.isEmpty()) {
+                nickInput.setError("Inserisci il nickname");
+                progressDialog.dismiss();
+            }
+            else if (pswd.isEmpty()) {
+                pswdInput.setError("Inserisci la password");
+                progressDialog.dismiss();
+            }
+            else {
+                authController.logIn(nick, pswd);
+            }
         });
     }
 
-    private void goToMainActivity() {
+    public void goToMainActivity() {
         startActivity(new Intent(this, MainActivity.class));
         finishAffinity();
+    }
+
+
+    public void showProgressDialog () {
+        progressDialog.show();
+    }
+    public void dismissProgressDialog () {
+        progressDialog.dismiss();
+    }
+
+    public TextInputLayout getNickInput() {
+        return nickInput;
+    }
+
+    public TextInputLayout getPswdInput() {
+        return pswdInput;
     }
 }

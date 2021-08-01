@@ -1,5 +1,9 @@
 package com.lso;
 
+import android.widget.Toast;
+
+import com.lso.activities.ConnectionActivity;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,13 +11,17 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+//
+
 public class ConnectionHandler {
 
-    private static final String TAG = ConnectionHandler.class.getSimpleName();
+    private static ConnectionActivity connectionActivity;
 
     //private static final String SERVER_IP = "20.203.137.149";
     private static final String SERVER_IP = "192.168.1.75";
     private static final int SERVER_PORT = 50000;
+
+    //private static final String CONNECTION_ERROR_MESSAGE;
 
     private static Socket clientSocket;
     private static PrintWriter out;
@@ -35,6 +43,25 @@ public class ConnectionHandler {
 
     }
 
+    public static void makeFirstConnection () {
+
+        connectionActivity.showProgressDialog();
+
+        new Thread(() -> {
+            if (ConnectionHandler.startConnection()) {
+                connectionActivity.runOnUiThread(() -> connectionActivity.dismissProgressDialog());
+                connectionActivity.goToAuthActivity();
+            } else {
+                connectionActivity.runOnUiThread(() -> {
+                    connectionActivity.dismissProgressDialog();
+                    Toast.makeText(connectionActivity, "Errore di connessione.", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+
+    }
+
+
     public static String read () throws IOException {
         return in.readLine();
     }
@@ -43,6 +70,7 @@ public class ConnectionHandler {
         out.print(line);
         out.flush();
     }
+
 
     public static void stopConnection () {
         try {
@@ -61,4 +89,8 @@ public class ConnectionHandler {
         }
     }
 
+
+    public static void setConnectionActivity(ConnectionActivity activity) {
+        connectionActivity = activity;
+    }
 }

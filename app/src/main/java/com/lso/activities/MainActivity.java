@@ -1,4 +1,4 @@
-package com.lso;
+package com.lso.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,8 +10,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import com.lso.control.AuthController;
+import com.lso.R;
+
 public class MainActivity extends AppCompatActivity {
 
+    private final AuthController authController = AuthController.getInstance();
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -32,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected (@NonNull MenuItem item) {
         if (item.getItemId() == R.id.logout) {
-            AuthHandler.logOut(this);
+            authController.logOut(this);
             return true;
         }
         return super.onOptionsItemSelected(item);

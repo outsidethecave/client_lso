@@ -7,12 +7,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="25dp"
-    tools:context=".LogInActivity">
+    tools:context=".activities.LogInActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="750dp"
-        tools:context=".LogInActivity">
+        tools:context=".activities.LogInActivity">
 
         <TextView
             android:id="@+id/conquer_txtview_login"

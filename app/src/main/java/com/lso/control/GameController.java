@@ -1,13 +1,24 @@
-package com.lso;
+package com.lso.control;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.res.ResourcesCompat;
 import androidx.gridlayout.widget.GridLayout;
+
+import com.lso.ConnectionHandler;
+import com.lso.Player;
+import com.lso.R;
+import com.lso.activities.ConnectionActivity;
+import com.lso.activities.GameActivity;
+import com.lso.activities.MainActivity;
+import com.lso.activities.WinnerActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,9 +43,9 @@ public class GameController {
     private static final char TIME_ENDED = '6';
     private static final char MATCH_LEFT = '0';
 
-
-    public static final int GRID_SIZE = 7;
-    private static final int WIN = 5;
+    private GridLayout grid;
+    public int gridSize;
+    private int winCondition;
 
     private GameActivity activity;
 
@@ -72,9 +83,9 @@ public class GameController {
 
             if (!hasLeftQueue) {
 
-                getPlayerData();
+                getGameData();
 
-                setGridToInitialPositions();
+                initGrid();
 
                 startGame();
 
@@ -126,7 +137,7 @@ public class GameController {
 
     }
 
-    private void getPlayerData () {
+    private void getGameData() {
 
         if (!players.isEmpty()) {
             throw new IllegalArgumentException("Dati già ottenuti");
@@ -151,19 +162,19 @@ public class GameController {
 
                 playerData_tokens = playerData.split("\\|");    // Separatore
 
-                nickname = playerData_tokens[0];
-                symbol = playerData_tokens[1];
-                x = Integer.parseInt(playerData_tokens[2]);
-                y = Integer.parseInt(playerData_tokens[3]);
-                position = GRID_SIZE * x + y;
+                gridSize = Integer.parseInt(playerData_tokens[0]);
+                winCondition = Integer.parseInt(playerData_tokens[1]);
+                nickname = playerData_tokens[2];
+                symbol = playerData_tokens[3];
+                x = Integer.parseInt(playerData_tokens[4]);
+                y = Integer.parseInt(playerData_tokens[5]);
+                position = gridSize * x + y;
 
                 players.add(new Player(nickname, symbol, position));
 
             } catch (IOException e) {
                 e.printStackTrace();
-                activity.runOnUiThread(() -> {
-                    Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show();
-                });
+                activity.runOnUiThread(() -> Toast.makeText(activity, "Errore di connessione.", Toast.LENGTH_SHORT).show());
                 clear();
                 activity.startActivity(new Intent(activity, ConnectionActivity.class));
                 activity.finishAffinity();
@@ -174,20 +185,46 @@ public class GameController {
 
     }
 
-    private void setGridToInitialPositions () {
+    private void makeGrid() {
 
-        GridLayout grid = activity.getGrid();
+        grid = activity.findViewById(R.id.grid);
 
-        TextView playerSquare;
+        TextView square; GridLayout.LayoutParams params;
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+
+                params = new GridLayout.LayoutParams();
+                params.columnSpec = GridLayout.spec(i, 1f);
+                params.rowSpec = GridLayout.spec(j, 1f);
+
+                square = new TextView(activity);
+
+                square.setGravity(Gravity.CENTER);
+                square.setBackground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.grid_square, activity.getTheme()));
+                square.setText(String.valueOf(0));
+                square.setTextSize(18);
+                square.setTextColor(Color.BLACK);
+                square.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                square.setLayoutParams(params);
+
+                TextView finalSquare = square;
+                activity.runOnUiThread(() -> grid.addView(finalSquare));
+
+            }
+        }
+
+    }
+
+    private void initGrid() {
+
+        makeGrid();
 
         for (Player p : players) {
 
-            playerSquare = (TextView) grid.getChildAt(p.getPosition());
-
-            final TextView playerSquare_final = playerSquare;
             activity.runOnUiThread(() -> {
-                playerSquare_final.setText(p.getSymbol());
-                playerSquare_final.setTextColor(p.getColor());
+                TextView playerSquare = (TextView) grid.getChildAt(p.getPosition());
+                playerSquare.setText(p.getSymbol());
+                playerSquare.setTextColor(p.getColor());
             });
 
         }
@@ -261,7 +298,7 @@ public class GameController {
                 break;
 
                 case TIME_ENDED:
-                    if (activePlayer.getNickname().equals(AuthHandler.currUser)) {
+                    if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                         activity.runOnUiThread(() -> Toast.makeText(activity, "Tempo scaduto!", Toast.LENGTH_SHORT).show());
                     }
                 break;
@@ -287,7 +324,7 @@ public class GameController {
             timer = startTimer(timerEnd);
             activePlayer = players.get(index);
             Log.d(TAG, "UNO - ACTIVE PLAYER SET: " + index);
-            if (activePlayer.getNickname().equals(AuthHandler.getCurrUser())) {
+            if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                 Toast.makeText(activity, "È il tuo turno", Toast.LENGTH_SHORT).show();
                 activity.enableButtons(true);
             } else {
@@ -322,15 +359,15 @@ public class GameController {
         });
 
         activePlayer.addTerritory();
-        if (activePlayer.getTerritories() == WIN) {
+        if (activePlayer.getTerritories() == winCondition) {
             winIsReached = true;
             winner = activePlayer.getNickname();
         }
         defendingPlayer.removeTerritory();
-        activePlayer.changePosition(GRID_SIZE, direction);
+        activePlayer.changePosition(gridSize, direction);
 
-        activePlayer_oldSquare = (TextView) activity.getGrid().getChildAt(oldPosition);
-        activePlayer_newSquare = (TextView) activity.getGrid().getChildAt(activePlayer.getPosition());
+        activePlayer_oldSquare = (TextView) grid.getChildAt(oldPosition);
+        activePlayer_newSquare = (TextView) grid.getChildAt(activePlayer.getPosition());
 
         activity.runOnUiThread(() -> {
             if (activePlayer_oldSquare.getText().toString().equals(activePlayer.getSymbol())) {
@@ -368,17 +405,17 @@ public class GameController {
 
         direction = serverData_array[1];
 
-        activePlayer.changePosition(GRID_SIZE, direction);
+        activePlayer.changePosition(gridSize, direction);
         if (free) {
             activePlayer.addTerritory();
-            if (activePlayer.getTerritories() == WIN) {
+            if (activePlayer.getTerritories() == winCondition) {
                 winIsReached = true;
                 winner = activePlayer.getNickname();
             }
         }
 
-        activePlayer_oldSquare = (TextView) activity.getGrid().getChildAt(oldPosition);
-        activePlayer_newSquare = (TextView) activity.getGrid().getChildAt(activePlayer.getPosition());
+        activePlayer_oldSquare = (TextView) grid.getChildAt(oldPosition);
+        activePlayer_newSquare = (TextView) grid.getChildAt(activePlayer.getPosition());
 
         activity.runOnUiThread(() -> {
             if (activePlayer_oldSquare.getText().toString().equals(activePlayer.getSymbol())) {
@@ -448,28 +485,28 @@ public class GameController {
         switch (direction) {
 
             case 'N':
-                if (activePlayer.getPosition() % GRID_SIZE == 0) {
+                if (activePlayer.getPosition() % gridSize == 0) {
                     Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Nord");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
                 break;
             case 'S':
-                if (activePlayer.getPosition() % GRID_SIZE == GRID_SIZE - 1) {
+                if (activePlayer.getPosition() % gridSize == gridSize - 1) {
                     Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Sud");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
                 break;
             case 'O':
-                if (activePlayer.getPosition() - GRID_SIZE < 0) {
+                if (activePlayer.getPosition() - gridSize < 0) {
                     Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Ovest");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
                 break;
             case 'E':
-                if (activePlayer.getPosition() + GRID_SIZE >= GRID_SIZE * GRID_SIZE) {
+                if (activePlayer.getPosition() + gridSize >= gridSize * gridSize) {
                     Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Est");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;

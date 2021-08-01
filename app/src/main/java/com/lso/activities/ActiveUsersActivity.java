@@ -1,29 +1,28 @@
-package com.lso;
+package com.lso.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import com.lso.control.ActiveUsersController;
+import com.lso.R;
+
 import java.util.List;
 
+@SuppressWarnings("ConstantConditions")
 public class ActiveUsersActivity extends AppCompatActivity {
 
-    private static final String TAG = ActiveUsersActivity.class.getSimpleName();
+    private final ActiveUsersController controller = ActiveUsersController.getInstance();
 
     private UsersAdapter adapter;
-    private RecyclerView recyclerView;
-    private final List<String> utenti = new ArrayList<>();
 
 
     @Override
@@ -31,33 +30,33 @@ public class ActiveUsersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active_users);
 
+        controller.setActivity(this);
+
         getSupportActionBar().setTitle("Conquer - Utenti Attivi");
 
-        recyclerView = findViewById(R.id.recyclerview_activeusers);
-        adapter = new UsersAdapter(this, utenti);
+        adapter = new UsersAdapter(this, controller.getUtenti());
 
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setReciclerView();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        new Thread(() -> {
-            boolean usersFetched = UserDataHandler.fetchActiveUsers(utenti);
-            if (!usersFetched) {
-                ConnectionHandler.stopConnection();
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Errore di connessione", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, ConnectionActivity.class));
-                    finishAffinity();
-                });
-            }
-            else {
-                runOnUiThread(() -> adapter.notifyDataSetChanged());
-            }
-        }).start();
+        controller.showActiveUsers();
     }
+
+
+    private void setReciclerView () {
+        RecyclerView recyclerView = findViewById(R.id.recyclerview_activeusers);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    public void notifyAdapter() {
+        adapter.notifyDataSetChanged();
+    }
+
 
 
     public static class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> {

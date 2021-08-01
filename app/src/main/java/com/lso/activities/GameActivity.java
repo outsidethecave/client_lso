@@ -1,26 +1,21 @@
-package com.lso;
+package com.lso.activities;
 
 import android.app.ProgressDialog;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.gridlayout.widget.GridLayout;
+
+import com.lso.control.GameController;
+import com.lso.R;
 
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = GameActivity.class.getSimpleName();
 
     private final GameController controller = GameController.getInstance();
-
-    private GridLayout grid;
 
     private Button north_btn;
     private Button south_btn;
@@ -45,7 +40,6 @@ public class GameActivity extends AppCompatActivity {
 
         initButtons();
         initAtkDefTimeViews();
-        initGrid();
         setProgressDialog();
 
         controller.play();
@@ -87,33 +81,6 @@ public class GameActivity extends AppCompatActivity {
         time_txtview = findViewById(R.id.time_txtview);
     }
 
-    private void initGrid () {
-        grid = findViewById(R.id.grid);
-
-        TextView square; GridLayout.LayoutParams params;
-        for (int i = 0; i < GameController.GRID_SIZE; i++) {
-            for (int j = 0; j < GameController.GRID_SIZE; j++) {
-
-                params = new GridLayout.LayoutParams();
-                params.columnSpec = GridLayout.spec(i, 1f);
-                params.rowSpec = GridLayout.spec(j, 1f);
-
-                square = new TextView(this);
-                square.setGravity(Gravity.CENTER);
-                square.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.grid_square, getTheme()));
-                square.setText(String.valueOf(0));
-                square.setTextSize(18);
-                square.setTextColor(Color.BLACK);
-                square.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                square.setLayoutParams(params);
-
-                grid.addView(square);
-
-            }
-        }
-
-    }
-
     private void setProgressDialog () {
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Ricerca partecipanti in corso...");
@@ -144,11 +111,6 @@ public class GameActivity extends AppCompatActivity {
     public void setText_time (long secs) {
         String timeleft = "00 : " + (secs >= 10 ? secs : "0" + secs);
         time_txtview.setText(timeleft);
-    }
-
-
-    public GridLayout getGrid() {
-        return grid;
     }
 
 }

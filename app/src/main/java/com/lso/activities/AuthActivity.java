@@ -1,4 +1,4 @@
-package com.lso;
+package com.lso.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
-public class AuthActivity extends AppCompatActivity {
+import com.lso.R;
 
-    private static final String TAG = AuthActivity.class.getSimpleName();
+public class AuthActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
