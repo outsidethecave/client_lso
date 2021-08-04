@@ -33,6 +33,7 @@ public class LogInActivity extends AppCompatActivity {
         setBackToMenuButton();
         setInputLayouts();
         setLoginBtn();
+
     }
 
 

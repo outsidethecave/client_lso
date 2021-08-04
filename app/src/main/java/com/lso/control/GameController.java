@@ -1,14 +1,24 @@
 package com.lso.control;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.CountDownTimer;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.gridlayout.widget.GridLayout;
 
@@ -21,6 +31,7 @@ import com.lso.activities.MainActivity;
 import com.lso.activities.WinnerActivity;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 
 public class GameController {
@@ -42,6 +53,11 @@ public class GameController {
     private static final char MOVE_ON_FREE_SQUARE = '5';
     private static final char TIME_ENDED = '6';
     private static final char MATCH_LEFT = '0';
+
+
+    private static final int FIRST_LOGMSG_SIZE = 30;
+    private static final int SECOND_LOGMSG_SIZE = 25;
+    private static final int EVENT_LOGMSG_SIZE = 20;
 
     private GridLayout grid;
     public int gridSize;
@@ -106,7 +122,6 @@ public class GameController {
 
         try {
             readVal = ConnectionHandler.read();
-            Log.d(TAG, "lookForMatch: " + readVal);
             if (LEAVE_QUEUE.equals(readVal)) {
                 hasLeftQueue = true;
             }
@@ -143,38 +158,55 @@ public class GameController {
             throw new IllegalArgumentException("Dati già ottenuti");
         }
 
-        String playerData;
-        String[] playerData_tokens;
+        String gameData;
+        String[] gameData_tokens;
+        
+        boolean gridAndWinRecieved = false;
 
         String nickname;
         String symbol;
         int x, y, position;
 
+        Player p;
+        String playerMessage;
+
         while (true) {
 
             try {
 
-                playerData = ConnectionHandler.read();
-                Log.d(TAG, "PLAYER DATA: " + playerData);
+                gameData = ConnectionHandler.read();
 
-                if ("|".equals(playerData)) break;
-                if (playerData == null) throw new IOException();
+                if ("|".equals(gameData)) break;
+                if (gameData == null) throw new IOException();
 
-                playerData_tokens = playerData.split("\\|");    // Separatore
+                gameData_tokens = gameData.split("\\|");    // Separatore
 
-                gridSize = Integer.parseInt(playerData_tokens[0]);
-                winCondition = Integer.parseInt(playerData_tokens[1]);
-                nickname = playerData_tokens[2];
-                symbol = playerData_tokens[3];
-                x = Integer.parseInt(playerData_tokens[4]);
-                y = Integer.parseInt(playerData_tokens[5]);
+                if (!gridAndWinRecieved) {
+                    gridSize = Integer.parseInt(gameData_tokens[0]);
+                    winCondition = Integer.parseInt(gameData_tokens[1]);
+                    gridAndWinRecieved = true;
+
+                    activity.log(0, FIRST_LOGMSG_SIZE, false, "TERRITORI DA CONQUISTARE: " + winCondition, 2);
+                    activity.log(0, SECOND_LOGMSG_SIZE, false, "GIOCATORI: ", 1);
+                }
+
+                nickname = gameData_tokens[2];
+                symbol = gameData_tokens[3];
+                x = Integer.parseInt(gameData_tokens[4]);
+                y = Integer.parseInt(gameData_tokens[5]);
                 position = gridSize * x + y;
 
-                players.add(new Player(nickname, symbol, position));
+                p = new Player(nickname, symbol, position);
+                players.add(p);
+
+                playerMessage = p.getSymbol() + " - " + p.getNickname() + "  (Posizione " + p.getPosition() + ")";
+                activity.log(p.getColor(), 20, false,  playerMessage, 1);
 
             } catch (IOException e) {
                 e.printStackTrace();
+
                 activity.runOnUiThread(() -> Toast.makeText(activity, ConnectionHandler.CONNECTION_ERROR_MESSAGE, Toast.LENGTH_SHORT).show());
+
                 clear();
                 activity.startActivity(new Intent(activity, ConnectionActivity.class));
                 activity.finishAffinity();
@@ -182,6 +214,8 @@ public class GameController {
             }
 
         }
+
+        activity.log(0, 20, false, "", 3);
 
     }
 
@@ -200,7 +234,7 @@ public class GameController {
                 square = new TextView(activity);
 
                 square.setGravity(Gravity.CENTER);
-                square.setBackground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.grid_square, activity.getTheme()));
+                square.setForeground(ResourcesCompat.getDrawable(activity.getResources(), R.drawable.grid_square, activity.getTheme()));
                 square.setText(String.valueOf(0));
                 square.setTextSize(18);
                 square.setTextColor(Color.BLACK);
@@ -224,7 +258,7 @@ public class GameController {
             activity.runOnUiThread(() -> {
                 TextView playerSquare = (TextView) grid.getChildAt(p.getPosition());
                 playerSquare.setText(p.getSymbol());
-                playerSquare.setTextColor(p.getColor());
+                playerSquare.setBackgroundColor(p.getColor());
             });
 
         }
@@ -237,7 +271,7 @@ public class GameController {
         long timerEnd;
         char[] serverMessage_array;
 
-        char action;
+        char event;
         int activePlayer_index;
 
         while (!winIsReached) {
@@ -247,8 +281,6 @@ public class GameController {
                 serverMessage = ConnectionHandler.read();
 
                 if (serverMessage == null) throw new IOException();
-
-                Log.d(TAG, "PLAY - SERVER MESSAGE: " + serverMessage);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -265,10 +297,9 @@ public class GameController {
 
             serverMessage_array = serverMessage.toCharArray();
 
-            action = serverMessage_array[0];
-            Log.d(TAG, "ACTION: " + action);
+            event = serverMessage_array[0];
 
-            switch (action) {
+            switch (event) {
 
                 case RECEIVE_ACTIVE_PLAYER_AND_TIME:
                     cancelTimer(timer);
@@ -298,6 +329,7 @@ public class GameController {
                 break;
 
                 case TIME_ENDED:
+                    activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, " Tempo scaduto per " + activePlayer.getNickname() + ".", 2);
                     if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                         activity.runOnUiThread(() -> Toast.makeText(activity, "Tempo scaduto!", Toast.LENGTH_SHORT).show());
                     }
@@ -307,7 +339,7 @@ public class GameController {
                     cancelTimer(timer);
                     clear();
                     goToMainActivity();
-                    return;
+                return;
 
                 default:
                     return;
@@ -321,20 +353,26 @@ public class GameController {
     }
     private void setActivePlayerAndButtonsAndTime(int index, long timerEnd) {
         activity.runOnUiThread(() -> {
+
             timer = startTimer(timerEnd);
             activePlayer = players.get(index);
-            Log.d(TAG, "UNO - ACTIVE PLAYER SET: " + index);
+
+            activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, "Tocca a " + activePlayer.getNickname() + " (Posizione: " + activePlayer.getPosition() + " Punteggio: " + activePlayer.getTerritories() + ")", 2);
+
             if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                 Toast.makeText(activity, "È il tuo turno", Toast.LENGTH_SHORT).show();
                 activity.enableButtons(true);
             } else {
                 activity.enableButtons(false);
             }
+
         });
     }
     private void updateGridAfterSuccessfulAttack (String serverData) {
 
         char[] serverData_array = serverData.toCharArray();
+
+        String logMessage;
 
         int oldPosition = activePlayer.getPosition();
 
@@ -351,6 +389,7 @@ public class GameController {
         atk = serverData_array[2];
         def = serverData_array[3];
         defendingPlayer_index = Integer.parseInt(serverData.substring(4));
+
         defendingPlayer = players.get(defendingPlayer_index);
 
         activity.runOnUiThread(() -> {
@@ -371,20 +410,30 @@ public class GameController {
 
         activity.runOnUiThread(() -> {
             if (activePlayer_oldSquare.getText().toString().equals(activePlayer.getSymbol())) {
-                activePlayer_oldSquare.setTextColor(Color.BLACK);
+                activePlayer_oldSquare.setBackgroundColor(Color.WHITE);
             }
             activePlayer_newSquare.setText(activePlayer.getSymbol());
-            activePlayer_newSquare.setTextColor(activePlayer.getColor());
-            Log.d(TAG, "DUE - GRID UPDATED AFTER SUCCESSFUL ATTACK. OLDPOS: " + oldPosition + " NEWPOS: " + activePlayer.getPosition());
+            activePlayer_newSquare.setBackgroundColor(activePlayer.getColor());
         });
+
+        logMessage = activePlayer.getNickname() + " si sposta in posizione " + activePlayer.getPosition() + ", sottraendola a " + defendingPlayer.getNickname() + " [ATK: " + atk + " DEF: " + def + "].";
+        activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, logMessage, 2);
 
     }
     private void updateGridAfterFailedAttack (String serverData) {
 
         char[] serverData_array = serverData.toCharArray();
 
+        String logMessage;
+
         char atk = serverData_array[2];
         char def = serverData_array[3];
+        int defendingPlayer_index = Integer.parseInt(serverData.substring(4));
+
+        Player defendingPlayer = players.get(defendingPlayer_index);
+
+        logMessage = activePlayer.getNickname() + " prova a spostarsi in posizione " + defendingPlayer.getPosition() + ", posseduta da " + defendingPlayer.getNickname() + ", ma fallisce [ATK: " + atk + " DEF: " + def + "].";
+        activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, logMessage, 2);
 
         activity.runOnUiThread(() -> {
             activity.setText_atk(atk);
@@ -395,6 +444,8 @@ public class GameController {
     private void updateGridAfterMoveToFreeOrOwnSquare (String serverData, boolean free) {
 
         char[] serverData_array = serverData.toCharArray();
+
+        String logMessage;
 
         int oldPosition = activePlayer.getPosition();
 
@@ -419,21 +470,28 @@ public class GameController {
 
         activity.runOnUiThread(() -> {
             if (activePlayer_oldSquare.getText().toString().equals(activePlayer.getSymbol())) {
-                activePlayer_oldSquare.setTextColor(Color.BLACK);
+                activePlayer_oldSquare.setBackgroundColor(Color.WHITE);
             }
             if (free) {
                 activePlayer_newSquare.setText(activePlayer.getSymbol());
             }
-            activePlayer_newSquare.setTextColor(activePlayer.getColor());
-            Log.d(TAG, "DUE - GRID UPDATED AFTER CONQUERING " + (free ? "FREE" : "OWN") + " SQUARE. OLDPOS: " + oldPosition + " NEWPOS: " + activePlayer.getPosition());
+            activePlayer_newSquare.setBackgroundColor(activePlayer.getColor());
         });
+
+        if (free) {
+            logMessage = activePlayer.getNickname() + " si sposta in posizione " + activePlayer.getPosition() + ", conquistandola.";
+        }
+        else {
+            logMessage = activePlayer.getNickname() + " si sposta in posizione " + activePlayer.getPosition() + ", già posseduta";
+        }
+
+        activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, logMessage, 2);
 
     }
     private void showWinner() {
         activity.runOnUiThread(() -> {
             goToWinnerActivity();
             clear();
-            Log.d(TAG, "ENDING MATCH");
         });
     }
     private void clear() {

@@ -13,7 +13,7 @@ public class UserDataAccess {
     public static int addUser (String nick, String pswd) {
 
         String outcome;
-        int outcome_int;
+        int    outcome_int;
 
         ConnectionHandler.write(AuthController.SIGNUP + nick + SEPARATOR + pswd);
         try {
@@ -53,11 +53,14 @@ public class UserDataAccess {
             if (outcome_int == AuthController.LOGIN_SUCCESS) {
                 return AuthController.LOGIN_SUCCESS;
             }
-            else if (outcome_int == AuthController.USER_DOESNT_EXIST) {
-                return AuthController.USER_DOESNT_EXIST;
+            else if (outcome_int == AuthController.USER_DOES_NOT_EXIST) {
+                return AuthController.USER_DOES_NOT_EXIST;
             }
             else if (outcome_int == AuthController.WRONG_PASSWORD) {
                 return AuthController.WRONG_PASSWORD;
+            }
+            else if (outcome_int == AuthController.USER_ALREADY_CONNECTED) {
+                return AuthController.USER_ALREADY_CONNECTED;
             }
 
         } catch (IOException e) {

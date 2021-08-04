@@ -20,9 +20,10 @@ public class AuthController {
 
     public static final int LOGIN = 2;
     public static final int LOGIN_SUCCESS = 0;
-    public static final int USER_DOESNT_EXIST = 1;
+    public static final int USER_DOES_NOT_EXIST = 1;
     public static final int WRONG_PASSWORD = 2;
-    public static final int GENERIC_LOGIN_FAILURE = 3;
+    public static final int USER_ALREADY_CONNECTED = 3;
+    public static final int GENERIC_LOGIN_FAILURE = 4;
 
     public static final int LOGOUT = 8;
 
@@ -91,11 +92,14 @@ public class AuthController {
                     loginActivity.goToMainActivity();
                     loginActivity.runOnUiThread(() -> Toast.makeText(loginActivity, nick + " ha effettuato il login", Toast.LENGTH_SHORT).show());
                 }
-                else if (loginOutcome == AuthController.USER_DOESNT_EXIST) {
+                else if (loginOutcome == AuthController.USER_DOES_NOT_EXIST) {
                     loginActivity.runOnUiThread(() -> loginActivity.getNickInput().setError("Non esiste un account con questo nome"));
                 }
                 else if (loginOutcome == AuthController.WRONG_PASSWORD) {
                     loginActivity.runOnUiThread(() -> loginActivity.getPswdInput().setError("Password errata"));
+                }
+                else if (loginOutcome == AuthController.USER_ALREADY_CONNECTED) {
+                    loginActivity.runOnUiThread(() -> loginActivity.getNickInput().setError("Questo utente risulta già connesso"));
                 }
                 else {
                     ConnectionHandler.stopConnection();

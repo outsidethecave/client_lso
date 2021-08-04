@@ -1,15 +1,30 @@
 package com.lso.activities;
 
 import android.app.ProgressDialog;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.TypefaceSpan;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.lso.control.GameController;
 import com.lso.R;
+
+import java.text.DateFormat;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -27,6 +42,8 @@ public class GameActivity extends AppCompatActivity {
 
     private TextView time_txtview;
 
+    private TextView gameLog;
+
     private ProgressDialog progressDialog;
 
 
@@ -37,6 +54,7 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         controller.setActivity(this);
+        gameLog = findViewById(R.id.log);
 
         initButtons();
         initAtkDefTimeViews();
@@ -109,6 +127,45 @@ public class GameActivity extends AppCompatActivity {
     public void setText_time (long secs) {
         String timeleft = "00 : " + (secs >= 10 ? secs : "0" + secs);
         time_txtview.setText(timeleft);
+    }
+
+    public void log (int color, int size, boolean time, String text, int vSpace) {
+
+        final SpannableString message = new SpannableString(text);
+
+        String timestring;
+        final SpannableString timestamp = new SpannableString(timestring = logtime());
+
+        StringBuilder spaces = new StringBuilder();
+
+        Typeface courier = Typeface.create(ResourcesCompat.getFont(this, R.font.courierprime_regular), Typeface.NORMAL);
+
+        message.setSpan(new ForegroundColorSpan(color != 0 ? color : Color.BLACK), 0, text.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        timestamp.setSpan(new ForegroundColorSpan(color != 0 ? color : Color.BLACK), 0, timestring.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        message.setSpan(new AbsoluteSizeSpan(size, true), 0, text.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        timestamp.setSpan(new AbsoluteSizeSpan(size, true), 0, timestring.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            message.setSpan(new TypefaceSpan(courier), 0, text.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+            timestamp.setSpan(new TypefaceSpan(courier), 0, timestring.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        }
+
+        while (vSpace --> 0) {
+            spaces.append("\n");
+        }
+
+        runOnUiThread(() -> {
+            if (time) {
+                gameLog.append(timestamp);
+            }
+            gameLog.append(message);
+            gameLog.append(spaces);
+        });
+
+    }
+
+
+    private String logtime () {
+        return "[" + DateFormat.getTimeInstance().format(new java.util.Date()) + "] ";
     }
 
 }
