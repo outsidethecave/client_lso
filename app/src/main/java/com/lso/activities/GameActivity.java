@@ -161,7 +161,7 @@ public class GameActivity extends AppCompatActivity {
 
 
     private String logtime () {
-        return "[" + DateFormat.getTimeInstance().format(new java.util.Date()) + "] ";
+        return DateFormat.getTimeInstance().format(new java.util.Date()) + " - ";
     }
 
 }

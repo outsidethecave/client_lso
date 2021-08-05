@@ -61,12 +61,19 @@ public class ConnectionHandler {
 
 
     public static String read () throws IOException {
-        return in.readLine();
+        if (in != null) {
+            return in.readLine();
+        }
+        else {
+            return null;
+        }
     }
 
     public static void write (String line) {
-        out.print(line);
-        out.flush();
+        if (out != null) {
+            out.print(line);
+            out.flush();
+        }
     }
 
 
