@@ -8,13 +8,13 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.lso.ConnectionHandler;
 import com.lso.R;
 
 public class ConnectionActivity extends AppCompatActivity {
 
-    private static final String TAG = ConnectionActivity.class.getSimpleName();
 
     private ProgressDialog progressDialog;
 
@@ -23,6 +23,8 @@ public class ConnectionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connection);
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         ConnectionHandler.setConnectionActivity(this);
 

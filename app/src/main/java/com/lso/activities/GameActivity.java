@@ -5,24 +5,20 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
 import android.text.style.TypefaceSpan;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 
-import com.lso.control.GameController;
 import com.lso.R;
+import com.lso.control.GameController;
 
 import java.text.DateFormat;
 
@@ -131,34 +127,34 @@ public class GameActivity extends AppCompatActivity {
 
     public void log (int color, int size, boolean time, String text, int vSpace) {
 
-        final SpannableString message = new SpannableString(text);
+        int messageLength;
+        SpannableString message;
+        StringBuilder vSpaceAdder;
+        Typeface courier;
 
-        String timestring;
-        final SpannableString timestamp = new SpannableString(timestring = logtime());
-
-        StringBuilder spaces = new StringBuilder();
-
-        Typeface courier = Typeface.create(ResourcesCompat.getFont(this, R.font.courierprime_regular), Typeface.NORMAL);
-
-        message.setSpan(new ForegroundColorSpan(color != 0 ? color : Color.BLACK), 0, text.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-        timestamp.setSpan(new ForegroundColorSpan(color != 0 ? color : Color.BLACK), 0, timestring.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-        message.setSpan(new AbsoluteSizeSpan(size, true), 0, text.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-        timestamp.setSpan(new AbsoluteSizeSpan(size, true), 0, timestring.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            message.setSpan(new TypefaceSpan(courier), 0, text.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
-            timestamp.setSpan(new TypefaceSpan(courier), 0, timestring.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        if (time) {
+            text = logtime() + text;
         }
+        messageLength = text.length();
 
+        vSpaceAdder = new StringBuilder(text);
         while (vSpace --> 0) {
-            spaces.append("\n");
+            vSpaceAdder.append("\n");
+        }
+        text = vSpaceAdder.toString();
+
+        message = new SpannableString(text);
+
+        courier = Typeface.create(ResourcesCompat.getFont(this, R.font.courierprime_regular), Typeface.NORMAL);
+
+        message.setSpan(new ForegroundColorSpan(color != 0 ? color : Color.BLACK), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        message.setSpan(new AbsoluteSizeSpan(size, true), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            message.setSpan(new TypefaceSpan(courier), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
         }
 
         runOnUiThread(() -> {
-            if (time) {
-                gameLog.append(timestamp);
-            }
             gameLog.append(message);
-            gameLog.append(spaces);
         });
 
     }

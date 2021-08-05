@@ -1,24 +1,13 @@
 package com.lso.control;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.CountDownTimer;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.constraintlayout.widget.Guideline;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.gridlayout.widget.GridLayout;
 
@@ -31,7 +20,6 @@ import com.lso.activities.MainActivity;
 import com.lso.activities.WinnerActivity;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 
 public class GameController {
@@ -103,7 +91,7 @@ public class GameController {
 
                 initGrid();
 
-                startGame();
+                game();
 
             }
 
@@ -265,7 +253,7 @@ public class GameController {
 
     }
 
-    private void startGame() {
+    private void game() {
 
         String serverMessage;
         long timerEnd;
@@ -329,10 +317,10 @@ public class GameController {
                 break;
 
                 case TIME_ENDED:
-                    activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, " Tempo scaduto per " + activePlayer.getNickname() + ".", 2);
                     if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                         activity.runOnUiThread(() -> Toast.makeText(activity, "Tempo scaduto!", Toast.LENGTH_SHORT).show());
                     }
+                    activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, " Tempo scaduto per " + activePlayer.getNickname() + ".", 2);
                 break;
 
                 case MATCH_LEFT:
@@ -342,7 +330,7 @@ public class GameController {
                 return;
 
                 default:
-                    return;
+                return;
 
             }
 
@@ -357,14 +345,14 @@ public class GameController {
             timer = startTimer(timerEnd);
             activePlayer = players.get(index);
 
-            activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, "Tocca a " + activePlayer.getNickname() + " (Posizione: " + activePlayer.getPosition() + " Punteggio: " + activePlayer.getTerritories() + ")", 2);
-
             if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                 Toast.makeText(activity, "È il tuo turno", Toast.LENGTH_SHORT).show();
                 activity.enableButtons(true);
             } else {
                 activity.enableButtons(false);
             }
+
+            activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, "Tocca a " + activePlayer.getNickname() + " (Posizione: " + activePlayer.getPosition() + " Punteggio: " + activePlayer.getTerritories() + ")", 2);
 
         });
     }
@@ -380,7 +368,7 @@ public class GameController {
         char atk, def;
         int defendingPlayer_index;
 
-        Player defendingPlayer;
+        Player defendingPlayer = null;
 
         TextView activePlayer_oldSquare;
         TextView activePlayer_newSquare;
@@ -390,7 +378,9 @@ public class GameController {
         def = serverData_array[3];
         defendingPlayer_index = Integer.parseInt(serverData.substring(4));
 
-        defendingPlayer = players.get(defendingPlayer_index);
+        if (defendingPlayer_index != -1) {
+            defendingPlayer = players.get(defendingPlayer_index);
+        }
 
         activity.runOnUiThread(() -> {
             activity.setText_atk(atk);
@@ -402,7 +392,9 @@ public class GameController {
             winIsReached = true;
             winner = activePlayer.getNickname();
         }
-        defendingPlayer.removeTerritory();
+        if (defendingPlayer != null) {
+            defendingPlayer.removeTerritory();
+        }
         activePlayer.changePosition(gridSize, direction);
 
         activePlayer_oldSquare = (TextView) grid.getChildAt(oldPosition);
@@ -416,7 +408,7 @@ public class GameController {
             activePlayer_newSquare.setBackgroundColor(activePlayer.getColor());
         });
 
-        logMessage = activePlayer.getNickname() + " si sposta in posizione " + activePlayer.getPosition() + ", sottraendola a " + defendingPlayer.getNickname() + " [ATK: " + atk + " DEF: " + def + "].";
+        logMessage = activePlayer.getNickname() + " si sposta in posizione " + activePlayer.getPosition() + ", sottraendola a " + (defendingPlayer != null ? defendingPlayer.getNickname() : "un disertore") + " [ATK: " + atk + " DEF: " + def + "].";
         activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, logMessage, 2);
 
     }
@@ -430,15 +422,24 @@ public class GameController {
         char def = serverData_array[3];
         int defendingPlayer_index = Integer.parseInt(serverData.substring(4));
 
-        Player defendingPlayer = players.get(defendingPlayer_index);
+        Player defendingPlayer = null;
 
-        logMessage = activePlayer.getNickname() + " prova a spostarsi in posizione " + defendingPlayer.getPosition() + ", posseduta da " + defendingPlayer.getNickname() + ", ma fallisce [ATK: " + atk + " DEF: " + def + "].";
-        activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, logMessage, 2);
+        if (defendingPlayer_index != -1) {
+            defendingPlayer = players.get(defendingPlayer_index);
+        }
 
         activity.runOnUiThread(() -> {
             activity.setText_atk(atk);
             activity.setText_def(def);
         });
+
+        if (defendingPlayer != null) {
+            logMessage = activePlayer.getNickname() + " prova a spostarsi in posizione " + defendingPlayer.getPosition() + ", posseduta da " + defendingPlayer.getNickname() + ", ma fallisce [ATK: " + atk + " DEF: " + def + "].";
+        }
+        else {
+            logMessage = activePlayer.getNickname() + " prova a spostarsi in una posizione posseduta da un disertore, ma le sue difese reggono ancora [ATK: " + atk + " DEF: " + def + "].";
+        }
+        activity.log(activePlayer.getColor(), EVENT_LOGMSG_SIZE, true, logMessage, 2);
 
     }
     private void updateGridAfterMoveToFreeOrOwnSquare (String serverData, boolean free) {
@@ -544,28 +545,24 @@ public class GameController {
 
             case 'N':
                 if (activePlayer.getPosition() % gridSize == 0) {
-                    Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Nord");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
                 break;
             case 'S':
                 if (activePlayer.getPosition() % gridSize == gridSize - 1) {
-                    Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Sud");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
                 break;
             case 'O':
                 if (activePlayer.getPosition() - gridSize < 0) {
-                    Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Ovest");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
                 break;
             case 'E':
                 if (activePlayer.getPosition() + gridSize >= gridSize * gridSize) {
-                    Log.d(TAG, "makeMove: tentativo di uscire dalla mappa a Est");
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Non puoi uscire dalla mappa!", Toast.LENGTH_SHORT).show());
                     return false;
                 }
