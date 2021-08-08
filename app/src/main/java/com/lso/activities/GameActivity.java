@@ -114,10 +114,12 @@ public class GameActivity extends AppCompatActivity {
         progressDialog.dismiss();
     }
 
-    public void setText_atk (char atk) {
+    public void setText_atk (char atk, int color) {
+        atk_txtview.setTextColor(color);
         atk_txtview.setText(String.valueOf(atk));
     }
-    public void setText_def (char def) {
+    public void setText_def (char def, int color) {
+        def_txtview.setTextColor(color);
         def_txtview.setText(String.valueOf(def));
     }
     public void setText_time (long secs) {
@@ -125,12 +127,16 @@ public class GameActivity extends AppCompatActivity {
         time_txtview.setText(timeleft);
     }
 
+    public void setColor_time (int color) {
+        time_txtview.setTextColor(color);
+    }
+
     public void log (int color, int size, boolean time, String text, int vSpace) {
 
         int messageLength;
         SpannableString message;
         StringBuilder vSpaceAdder;
-        Typeface courier;
+        Typeface segoe;
 
         if (time) {
             text = logtime() + text;
@@ -145,12 +151,12 @@ public class GameActivity extends AppCompatActivity {
 
         message = new SpannableString(text);
 
-        courier = Typeface.create(ResourcesCompat.getFont(this, R.font.courierprime_regular), Typeface.NORMAL);
+        segoe = Typeface.create(ResourcesCompat.getFont(this, R.font.segoeuilight), Typeface.NORMAL);
 
         message.setSpan(new ForegroundColorSpan(color != 0 ? color : Color.BLACK), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
         message.setSpan(new AbsoluteSizeSpan(size, true), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            message.setSpan(new TypefaceSpan(courier), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+            message.setSpan(new TypefaceSpan(segoe), 0, messageLength, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
         }
 
         runOnUiThread(() -> {

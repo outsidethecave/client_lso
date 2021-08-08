@@ -351,8 +351,9 @@ public class GameController {
     private void setActivePlayerAndButtonsAndTime(int index, long timerEnd) {
         activity.runOnUiThread(() -> {
 
-            timer = startTimer(timerEnd);
             activePlayer = players.get(index);
+            activity.setColor_time(activePlayer.getColor());
+            timer = startTimer(timerEnd);
 
             if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
                 Toast.makeText(activity, "È il tuo turno", Toast.LENGTH_SHORT).show();
@@ -388,9 +389,15 @@ public class GameController {
             defendingPlayer = players.get(defendingPlayer_index);
         }
 
+        Player finalDefendingPlayer = defendingPlayer;
         activity.runOnUiThread(() -> {
-            activity.setText_atk(atk);
-            activity.setText_def(def);
+            activity.setText_atk(atk, activePlayer.getColor());
+            if (finalDefendingPlayer != null) {
+                activity.setText_def(def, finalDefendingPlayer.getColor());
+            }
+            else {
+                activity.setText_def(def, Color.GRAY);
+            }
         });
 
         activePlayer.addTerritory();
@@ -429,9 +436,15 @@ public class GameController {
             defendingPlayer = players.get(defendingPlayer_index);
         }
 
+        Player finalDefendingPlayer = defendingPlayer;
         activity.runOnUiThread(() -> {
-            activity.setText_atk(atk);
-            activity.setText_def(def);
+            activity.setText_atk(atk, activePlayer.getColor());
+            if (finalDefendingPlayer != null) {
+                activity.setText_def(def, finalDefendingPlayer.getColor());
+            }
+            else {
+                activity.setText_def(def, Color.GRAY);
+            }
         });
 
         if (activePlayer.getNickname().equals(AuthController.getCurrUser())) {
