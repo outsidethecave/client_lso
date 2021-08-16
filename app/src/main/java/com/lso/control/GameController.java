@@ -277,7 +277,8 @@ public class GameController {
 
                 if (serverMessage == null) throw new IOException();
 
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
 
                 if (timer != null) timer.cancel();
@@ -319,7 +320,6 @@ public class GameController {
                     cancelTimer(timer);
                     handleMoveToFreeOrOwnSquare(serverMessage, false);
                 break;
-
                 case MOVE_ON_FREE_SQUARE:
                     cancelTimer(timer);
                     handleMoveToFreeOrOwnSquare(serverMessage, true);

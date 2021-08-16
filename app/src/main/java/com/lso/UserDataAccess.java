@@ -13,7 +13,7 @@ public class UserDataAccess {
     public static int addUser (String nick, String pswd) {
 
         String outcome;
-        int    outcome_int;
+        int outcome_int;
 
         ConnectionHandler.write(AuthController.SIGNUP + nick + SEPARATOR + pswd);
         try {
