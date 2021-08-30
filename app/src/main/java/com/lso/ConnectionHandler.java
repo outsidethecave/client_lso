@@ -15,8 +15,8 @@ public class ConnectionHandler {
 
     private static ConnectionActivity connectionActivity;
 
-//    private static final String SERVER_IP = "20.203.137.149";         //IP di Azure
-    private static final String SERVER_IP = "192.168.1.75";             //IP di test
+    private static final String SERVER_IP = "20.203.137.149";           //IP di Azure
+//  private static final String SERVER_IP = "192.168.1.75";             //IP di test
     private static final int SERVER_PORT = 50000;
 
     public static final String CONNECTION_ERROR_MESSAGE = "Errore di connessione";
