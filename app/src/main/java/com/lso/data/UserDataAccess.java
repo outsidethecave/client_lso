@@ -1,5 +1,6 @@
-package com.lso;
+package com.lso.data;
 
+import com.lso.ConnectionHandler;
 import com.lso.control.AuthController;
 
 import java.io.IOException;

@@ -191,16 +191,27 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/grid"/>
 
-        <TextView
-            android:id="@+id/log"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/log_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="350dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginTop="240dp"
-            android:textAllCaps="false"
-            android:paddingStart="10sp"
-            android:paddingEnd="10sp"
-            app:layout_constraintTop_toBottomOf="@id/grid"
-            tools:layout_editor_absoluteX="0dp" />
+            android:fillViewport="true"
+            android:background="@drawable/rectangle_border"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/grid">
+
+            <TextView
+                android:id="@+id/log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="10sp"
+                android:paddingEnd="10sp"
+                android:textAllCaps="false" />
+
+        </androidx.core.widget.NestedScrollView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

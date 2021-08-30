@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.lso.ConnectionHandler;
-import com.lso.UserDataAccess;
+import com.lso.data.UserDataAccess;
 import com.lso.activities.ActiveUsersActivity;
 import com.lso.activities.ConnectionActivity;
 
